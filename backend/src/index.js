@@ -22,8 +22,8 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (curl, Postman, mobile) + any localhost port
-      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      // Allow requests with no origin (curl, Postman, mobile) + any localhost port + any Vercel deployment
+      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('vercel.app')) {
         return callback(null, true);
       }
       const allowed = process.env.FRONTEND_URL || 'http://localhost:3000';
