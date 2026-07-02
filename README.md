@@ -3,7 +3,7 @@
   <h1>CodeNova AI</h1>
   <p><strong>A GitHub-focused AI Coding Assistant & Repository Intelligence Platform</strong></p>
 
-  [![Live Demo](https://img.shields.io/badge/Live_Demo-codenova--ai-00F5FF?style=for-the-badge)](https://codenova-n1ye863nz-sanjana-projects.vercel.app)
+  [![Live Demo](https://img.shields.io/badge/Live_Demo-codenova--ai-00F5FF?style=for-the-badge)](https://codenova-ai-ivory.vercel.app)
 </div>
 
 <br />
