@@ -20,17 +20,15 @@ class AIService {
     
     // Initialize LangChain Models with Gemini
     this.chatModel = new ChatGoogleGenerativeAI({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-pro',
       temperature: 0.7,
       apiKey: apiKey || 'missing'
     });
 
     this.jsonModel = new ChatGoogleGenerativeAI({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-pro',
       temperature: 0.7,
-      apiKey: apiKey || 'missing',
-      // Gemini 1.5 supports JSON mode
-      modelKwargs: { response_mime_type: "application/json" }
+      apiKey: apiKey || 'missing'
     });
 
     this.embeddings = new GoogleGenerativeAIEmbeddings({
