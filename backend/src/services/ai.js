@@ -74,7 +74,8 @@ class AIService {
     this.embeddings = new OpenAIEmbeddings({
       modelName: 'text-embedding-3-small',
       openAIApiKey: apiKey || 'missing',
-      batchSize: 512
+      batchSize: 512,
+      maxRetries: 0
     });
 
     console.log('[AIService] ✅ LangChain initialized');
