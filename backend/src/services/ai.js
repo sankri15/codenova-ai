@@ -193,19 +193,23 @@ Write an extremely detailed explanation (at least 500 words) with these sections
   async generateReadme(repoContext) {
     try {
       const response = await this._generate(
-        'You are an expert technical writer and open-source maintainer. Create a professional, extremely comprehensive, and beautifully structured README.md. Use badges, emojis, tables, and rich formatting. It must be very detailed (at least 800 words). Do NOT wrap your entire response in a markdown code block, just output the raw markdown text.',
-        `Generate a complete, production-ready README.md for:
+        'You are an expert technical writer. Create a professional, extremely comprehensive README.md. You MUST NOT wrap your response in ```markdown or ``` tags. Do not use ANY code block fences for the whole document. Output ONLY the raw markdown text itself so it renders natively. Do NOT say "Here is your README".',
+        `Generate a complete, production-ready README.md (at least 800 words) for:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description}
-Languages: ${JSON.stringify(repoContext.languages)}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 
-Make sure to include comprehensive installation steps, usage examples, API documentation (if applicable), and a beautiful architecture overview.`
+REQUIREMENTS:
+1. Start with a beautiful header image using exactly this syntax: ![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
+2. Include badges, emojis, and a beautiful architecture table.
+3. Put exactly 2 blank lines between EVERY section to create massive spacing.
+4. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
       );
       
-      // Clean up any outer markdown fences that the model might accidentally add
-      return response.replace(/^```(markdown|md)?\n/i, '').replace(/\n```$/i, '').trim();
+      // Aggressive fallback to strip any markdown block the AI stubbornly includes
+      const stripped = response.replace(/^[\s\S]*?```(?:markdown|md)?\n/i, '').replace(/\n```[\s\S]*?$/i, '').trim();
+      return stripped || response.trim();
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
       throw err;
