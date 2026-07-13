@@ -194,17 +194,46 @@ Write an extremely detailed explanation (at least 500 words) with these sections
     try {
       const response = await this._generate(
         'You are an expert technical writer. Create a professional, extremely comprehensive README.md. You MUST NOT wrap your response in ```markdown or ``` tags. Do not use ANY code block fences for the whole document. Output ONLY the raw markdown text itself so it renders natively. Do NOT say "Here is your README".',
-        `Generate a complete, production-ready README.md (at least 800 words) for:
+        `Generate a complete, production-ready README.md for this repository:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 
+You MUST strictly follow this exact template structure and use these exact emojis for the headers:
+
+# ${repoContext.name}
+A brief highly professional one-line description.
+
+![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
+
+## 🚀 Overview
+[Detailed overview of the project]
+
+## 🖼️ How It Works
+[Explain the core mechanics, UI, and how users interact with it]
+
+## 🌍 Architecture
+[Explain the frontend, backend, and deployment architecture]
+
+## ✨ Features
+[List of features with emojis]
+
+## 🛠️ Tech Stack
+[Categorized tech stack]
+
+## 📁 Project Structure
+[Markdown tree of the codebase]
+
+## 💻 Getting Started
+[Step-by-step setup instructions]
+
+## 👨💻 Author
+[Author details]
+
 REQUIREMENTS:
-1. Start with a beautiful header image using exactly this syntax: ![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
-2. Include badges, emojis, and a beautiful architecture table.
-3. Put exactly 2 blank lines between EVERY section to create massive spacing.
-4. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
+1. Put exactly 2 blank lines between EVERY single section to create massive spacing.
+2. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
       );
       
       // Aggressive fallback to strip any markdown block the AI stubbornly includes
