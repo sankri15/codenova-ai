@@ -138,23 +138,28 @@ router.post('/analyze', async (req, res, next) => {
     const { owner, repo } = githubService.parseRepoUrl(repoUrl);
     console.log(`[/analyze] Processing: ${owner}/${repo} (token: ${ghToken ? 'yes' : 'no'})`);
 
-    const [metadata, languages, fileTree, commits, contributors] =
-      await Promise.all([
-        githubService.getRepoMetadata(owner, repo, ghToken),
-        githubService.getLanguages(owner, repo, ghToken),
-        githubService.getRepoTree(owner, repo, ghToken),
-        githubService.getCommits(owner, repo, 10, ghToken),
-        githubService.getContributors(owner, repo, ghToken),
-      ]);
+    // 1. Fetch metadata first to get the defaultBranch (super fast)
+    const metadata = await githubService.getRepoMetadata(owner, repo, ghToken);
 
-    const keyFiles = ['package.json', 'requirements.txt', 'Dockerfile', 'docker-compose.yml', 'go.mod', 'Cargo.toml', 'pom.xml'];
+    // 2. Fetch everything else in true parallel, using the known defaultBranch for getRepoTree
+    const [languages, fileTree, commits, contributors] = await Promise.all([
+      githubService.getLanguages(owner, repo, ghToken),
+      githubService.getRepoTree(owner, repo, ghToken, metadata.defaultBranch),
+      githubService.getCommits(owner, repo, 5, ghToken),
+      githubService.getContributors(owner, repo, ghToken),
+    ]);
+
+    // 3. Immediately fetch package.json and requirements.txt (limit to top 2 for speed)
     const fileContents = {};
-    await Promise.allSettled(
+    const keyFiles = ['package.json', 'requirements.txt'];
+    await Promise.all(
       keyFiles.map(async (filePath) => {
         const exists = fileTree.some((f) => f.path === filePath || f.path.endsWith(`/${filePath}`));
         if (!exists) return;
-        const content = await githubService.getFileContent(owner, repo, filePath, ghToken);
-        if (content) fileContents[filePath] = content;
+        try {
+          const content = await githubService.getFileContent(owner, repo, filePath, ghToken);
+          if (content) fileContents[filePath] = content;
+        } catch (e) { /* ignore */ }
       })
     );
 

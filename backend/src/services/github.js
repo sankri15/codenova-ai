@@ -82,11 +82,14 @@ class GitHubService {
   }
 
   // ─── getRepoTree ─────────────────────────────────────────────────────────────
-  async getRepoTree(owner, repo, token) {
+  async getRepoTree(owner, repo, token, knownDefaultBranch = null) {
     try {
       const kit = this._kit(token);
-      const repoData = await kit.repos.get({ owner, repo });
-      const branch = repoData.data.default_branch;
+      let branch = knownDefaultBranch;
+      if (!branch) {
+        const repoData = await kit.repos.get({ owner, repo });
+        branch = repoData.data.default_branch;
+      }
       const { data } = await kit.git.getTree({ owner, repo, tree_sha: branch, recursive: 'true' });
       return (data.tree || []).map(item => ({
         path: item.path,
