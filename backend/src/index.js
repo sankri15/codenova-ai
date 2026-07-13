@@ -71,7 +71,7 @@ app.get('/health', (req, res) => {
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     github_token: token && token.length > 10 ? '✅ configured' : '⚠️ not set',
     ai_mode: process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'sk-your-key-here'
-      ? '✅ OpenAI live' : '⚡ demo mode',
+      ? '✅ Gemini live' : '⚡ missing key',
   });
 });
 
@@ -114,7 +114,7 @@ const startServer = async () => {
     console.log(`\n🚀 CodeNova backend running on port ${PORT}`);
     console.log(`   Health: http://localhost:${PORT}/health`);
     console.log(`   GitHub token: ${process.env.GITHUB_TOKEN?.length > 10 ? '✅ configured' : '⚠️  not set'}`);
-    console.log(`   AI mode: ${process.env.OPENAI_API_KEY !== 'sk-your-key-here' ? '✅ OpenAI live' : '⚡ demo mode'}\n`);
+    console.log(`   AI mode: ${process.env.GOOGLE_API_KEY ? '✅ Gemini live' : '⚠️  GOOGLE_API_KEY missing'}\n`);
   });
 };
 
