@@ -2,7 +2,7 @@
  * ai.js — OpenAI service for CodeNova using LangChain (with demo-mode fallback).
  */
 
-import { ChatGoogleGenAI, GoogleGenAIEmbeddings } from '@langchain/google-genai';
+import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -19,13 +19,13 @@ class AIService {
     }
     
     // Initialize LangChain Models with Gemini
-    this.chatModel = new ChatGoogleGenAI({
+    this.chatModel = new ChatGoogleGenerativeAI({
       modelName: 'gemini-1.5-flash',
       temperature: 0.7,
       apiKey: apiKey || 'missing'
     });
 
-    this.jsonModel = new ChatGoogleGenAI({
+    this.jsonModel = new ChatGoogleGenerativeAI({
       modelName: 'gemini-1.5-flash',
       temperature: 0.7,
       apiKey: apiKey || 'missing',
@@ -33,7 +33,7 @@ class AIService {
       modelKwargs: { response_mime_type: "application/json" }
     });
 
-    this.embeddings = new GoogleGenAIEmbeddings({
+    this.embeddings = new GoogleGenerativeAIEmbeddings({
       modelName: 'text-embedding-004',
       apiKey: apiKey || 'missing'
     });
