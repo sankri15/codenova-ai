@@ -206,8 +206,6 @@ CRITICAL RULE: DO NOT WRITE LONG PARAGRAPHS. You MUST present all information us
 # ${repoContext.name}
 A brief highly professional one-line description.
 
-![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
-
 ## 🚀 Overview
 [Use 3-5 highly detailed bullet points to explain what the project does]
 
