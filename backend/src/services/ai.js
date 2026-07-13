@@ -207,40 +207,32 @@ A brief highly professional one-line description.
 
 ![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
 
-<br><br><br>
 ## 🚀 Overview
 [Extremely detailed and long overview of the project, spanning multiple paragraphs]
 
-<br><br><br>
 ## 🖼️ How It Works
 [Deep explanation of the core mechanics, UI, and how users interact with it, highly detailed]
 
-<br><br><br>
 ## 🌍 Architecture
 [Deep explanation of the frontend, backend, and deployment architecture]
 
-<br><br><br>
 ## ✨ Features
 [Exhaustive list of every single feature with emojis and deep explanations]
 
-<br><br><br>
 ## 🛠️ Tech Stack
 [Categorized tech stack with detailed explanations for why each tech was chosen]
 
-<br><br><br>
 ## 📁 Project Structure
 [Present the project structure ONLY as a highly detailed Markdown Table (Columns: File/Folder, Type, Description). Do NOT use ASCII trees.]
 
-<br><br><br>
 ## 💻 Getting Started
 [Extremely detailed, step-by-step setup instructions]
 
-<br><br><br>
 ## 👨💻 Author
 [Author details]
 
 REQUIREMENTS:
-1. You MUST include exactly <br><br><br> before EVERY single ## heading to create a massive 3-line gap, as shown in the template above.
+1. Ensure the markdown is exceptionally clean and professional.
 2. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
       );
       
