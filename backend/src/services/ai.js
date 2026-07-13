@@ -19,13 +19,35 @@ class AIService {
     console.log('[AIService] ✅ Initialized with Gemini Flash Latest (@google/genai v1)');
   }
 
+  // ── Internal: Automatic Retry Wrapper ──────────────────────────────────────
+  async _withRetry(fn, maxRetries = 3) {
+    let attempt = 0;
+    while (attempt < maxRetries) {
+      try {
+        return await fn();
+      } catch (err) {
+        attempt++;
+        // Check for 503 (Unavailable/High Demand) or 429 (Rate Limit)
+        if ((err.status === 503 || err.status === 429) && attempt < maxRetries) {
+          const delay = Math.pow(2, attempt) * 1000 + Math.random() * 500;
+          console.warn(`[AIService] API busy (503/429). Retrying in ${Math.round(delay)}ms... (Attempt ${attempt}/${maxRetries})`);
+          await new Promise(r => setTimeout(r, delay));
+        } else {
+          throw err;
+        }
+      }
+    }
+  }
+
   // ── Internal: text-only chat ───────────────────────────────────────────────
   async _generate(systemPrompt, userPrompt) {
-    const response = await this.ai.models.generateContent({
-      model: 'gemini-flash-latest',
-      contents: `${systemPrompt}\n\n${userPrompt}`,
+    return this._withRetry(async () => {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: `${systemPrompt}\n\n${userPrompt}`,
+      });
+      return response.text;
     });
-    return response.text;
   }
 
   // ── Internal: chat with image ──────────────────────────────────────────────
@@ -34,23 +56,25 @@ class AIService {
     const mimeType = matches ? matches[1] : 'image/png';
     const base64Data = matches ? matches[2] : base64DataUrl;
 
-    const response = await this.ai.models.generateContent({
-      model: 'gemini-flash-latest',
-      contents: [
-        { text: `${systemPrompt}\n\n${userPrompt}` },
-        { inlineData: { mimeType, data: base64Data } },
-      ],
+    return this._withRetry(async () => {
+      const response = await this.ai.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: [
+          { text: `${systemPrompt}\n\n${userPrompt}` },
+          { inlineData: { mimeType, data: base64Data } },
+        ],
+      });
+      return response.text;
     });
-    return response.text;
   }
 
   // ── Embeddings ─────────────────────────────────────────────────────────────
   async createEmbedding(text) {
     try {
-      const response = await this.ai.models.embedContent({
+      const response = await this._withRetry(() => this.ai.models.embedContent({
         model: 'gemini-embedding-2',
         contents: text.replace(/\n/g, ' ').slice(0, 8000),
-      });
+      }));
       return response.embeddings[0].values;
     } catch (err) {
       console.warn('[AIService] Embedding failed:', err.message);
@@ -63,10 +87,10 @@ class AIService {
     const results = [];
     for (const text of texts) {
       try {
-        const response = await this.ai.models.embedContent({
+        const response = await this._withRetry(() => this.ai.models.embedContent({
           model: 'gemini-embedding-2',
           contents: text.replace(/\n/g, ' ').slice(0, 8000),
-        });
+        }));
         results.push(response.embeddings[0].values);
       } catch (err) {
         console.warn('[AIService] Embedding item failed, using zeros:', err.message);
