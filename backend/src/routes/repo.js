@@ -163,10 +163,10 @@ router.post('/analyze', async (req, res, next) => {
 
     const response = {
       sessionId, owner, repo, metadata, languages,
-      fileTree: fileTree.slice(0, 200),
+      fileTree: fileTree.slice(0, 50), // Reduced from 200 to 50 for extreme speed
       techStack,
-      commits: commits.slice(0, 10),
-      contributors: contributors.slice(0, 10),
+      commits: commits.slice(0, 5),    // Reduced from 10 to 5 for speed
+      contributors: contributors.slice(0, 5), // Reduced from 10 to 5 for speed
     };
 
     if (mongoose.connection.readyState === 1) {

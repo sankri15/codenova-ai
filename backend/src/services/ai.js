@@ -103,23 +103,25 @@ class AIService {
   // ── Explain project ────────────────────────────────────────────────────────
   async explainProject(repoContext) {
     try {
+      // Map file tree to just names to save massive amounts of tokens
+      const fileNames = Array.isArray(repoContext.fileTree) 
+        ? repoContext.fileTree.map(f => f.path || f).slice(0, 30).join(', ') 
+        : 'Not available';
+
       return await this._generate(
-        'You are an expert software architect. Explain codebases clearly using markdown formatting.',
+        'You are an expert software architect. Explain codebases clearly using markdown. Be extremely concise, brief, and to the point to ensure fast generation.',
         `Analyze this GitHub repository:
 
 Repository: ${repoContext.name}
-Owner: ${repoContext.owner}
 Description: ${repoContext.description || 'No description'}
 Languages: ${JSON.stringify(repoContext.languages)}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
-File Structure:
-${repoContext.fileTree || 'Not available'}
+Files: ${fileNames}
 
-Write a detailed explanation with these sections:
+Write a brief explanation with these short sections:
 # What This Project Does
 # Architecture Overview
 # Tech Stack Breakdown
-# Key Design Patterns
 # Beginner-Friendly Explanation`
       );
     } catch (err) {
