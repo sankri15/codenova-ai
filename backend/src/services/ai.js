@@ -193,14 +193,15 @@ Write an extremely detailed explanation (at least 500 words) with these sections
   async generateReadme(repoContext) {
     try {
       const response = await this._generate(
-        'You are an expert technical writer. Create a professional, extremely comprehensive README.md. You MUST NOT wrap your response in ```markdown or ``` tags. Do not use ANY code block fences for the whole document. Output ONLY the raw markdown text itself so it renders natively. Do NOT say "Here is your README".',
+        'You are an expert technical writer. Create a professional, extremely structured README.md. You MUST NOT wrap your response in ```markdown or ``` tags. Output ONLY the raw markdown text itself so it renders natively. Do NOT say "Here is your README".',
         `Generate a complete, production-ready README.md for this repository:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 
-You MUST strictly follow this exact template structure and use these exact emojis for the headers. Make every single section EXTREMELY long, detailed, and highly descriptive. Write at least 1500 words total.
+You MUST strictly follow this exact template structure and use these exact emojis for the headers. 
+CRITICAL RULE: DO NOT WRITE LONG PARAGRAPHS. You MUST present all information using structured bullet points or Markdown tables. Make it extremely structured and highly attractive to read.
 
 # ${repoContext.name}
 A brief highly professional one-line description.
@@ -208,31 +209,31 @@ A brief highly professional one-line description.
 ![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
 
 ## 🚀 Overview
-[Extremely detailed and long overview of the project, spanning multiple paragraphs]
+[Use 3-5 highly detailed bullet points to explain what the project does]
 
 ## 🖼️ How It Works
-[Deep explanation of the core mechanics, UI, and how users interact with it, highly detailed]
+[Use a structured step-by-step numbered list or bullet points explaining the core mechanics]
 
 ## 🌍 Architecture
-[Deep explanation of the frontend, backend, and deployment architecture]
+[Use a Markdown Table explaining Frontend, Backend, and Deployment architecture]
 
 ## ✨ Features
-[Exhaustive list of every single feature with emojis and deep explanations]
+[Exhaustive bulleted list of every single feature with emojis]
 
 ## 🛠️ Tech Stack
-[Categorized tech stack with detailed explanations for why each tech was chosen]
+[Use a Markdown Table for categorized tech stack (e.g. Category | Technology | Purpose)]
 
 ## 📁 Project Structure
-[Present the project structure ONLY as a highly detailed Markdown Table (Columns: File/Folder, Type, Description). Do NOT use ASCII trees.]
+[Present the project structure ONLY as a detailed Markdown Table (Columns: File/Folder, Type, Description). Do NOT use ASCII trees.]
 
 ## 💻 Getting Started
-[Extremely detailed, step-by-step setup instructions]
+[Structured step-by-step numbered list for setup instructions]
 
 ## 👨💻 Author
-[Author details]
+[Bullet points for Author details]
 
 REQUIREMENTS:
-1. Ensure the markdown is exceptionally clean and professional.
+1. Ensure the markdown is exceptionally clean and heavily relies on lists and tables.
 2. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
       );
       
