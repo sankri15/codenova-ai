@@ -207,31 +207,39 @@ CRITICAL RULE: DO NOT WRITE LONG PARAGRAPHS. You MUST present all information us
 A brief highly professional one-line description.
 
 ## 🚀 Overview
+<br><br>
 [Use 3-5 highly detailed bullet points to explain what the project does]
 
 ## 🖼️ How It Works
+<br><br>
 [Use a structured step-by-step numbered list or bullet points explaining the core mechanics]
 
 ## 🌍 Architecture
+<br><br>
 [Use a Markdown Table explaining Frontend, Backend, and Deployment architecture]
 
 ## ✨ Features
+<br><br>
 [Exhaustive bulleted list of every single feature with emojis]
 
 ## 🛠️ Tech Stack
+<br><br>
 [Use a Markdown Table for categorized tech stack (e.g. Category | Technology | Purpose)]
 
 ## 📁 Project Structure
+<br><br>
 [Present the project structure ONLY as a detailed Markdown Table (Columns: File/Folder, Type, Description). Do NOT use ASCII trees.]
 
 ## 💻 Getting Started
+<br><br>
 [Structured step-by-step numbered list for setup instructions]
 
 ## 👨💻 Author
+<br><br>
 [Bullet points for Author details]
 
 REQUIREMENTS:
-1. Ensure the markdown is exceptionally clean and heavily relies on lists and tables.
+1. You MUST include exactly <br><br> after EVERY single ## heading to create a massive physical gap for GitHub rendering.
 2. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
       );
       
