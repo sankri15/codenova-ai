@@ -359,7 +359,7 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
                         rehypePlugins={[rehypeRaw]}
                         components={markdownComponents}
                       >
-                        {readme}
+                        {readme.replace(/<br\s*\/?>/gi, '')}
                       </ReactMarkdown>
                     </div>
                   </div>
