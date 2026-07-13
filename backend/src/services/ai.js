@@ -43,7 +43,7 @@ class AIService {
   async _generate(systemPrompt, userPrompt) {
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: `${systemPrompt}\n\n${userPrompt}`,
         config: {
           temperature: 0, // Removes sampling overhead for instant greedy decoding
@@ -62,7 +62,7 @@ class AIService {
 
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash-8b',
+        model: 'gemini-1.5-flash',
         contents: [
           { text: `${systemPrompt}\n\n${userPrompt}` },
           { inlineData: { mimeType, data: base64Data } },
