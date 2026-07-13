@@ -100,17 +100,18 @@ class RAGService {
     console.log(`[RAGService] File tree has ${fileTree.length} items.`);
 
     // ── Step 2: Filter to text files only ──────────────────────────────────
-    const textFiles = fileTree
-      .filter((file) => this.isTextFile(file.path))
-      .slice(0, 15); // Cap at 15 files for fast embedding (was 40)
+    const filesToProcess = fileTree.filter((file) => this.isTextFile(file.path));
 
-    console.log(`[RAGService] ${textFiles.length} text files to process.`);
+    console.log(`[RAGService] ${filesToProcess.length} text files to process.`);
 
-    // ── Step 3: Fetch content for each file ────────────────────────────────
+    // ── Step 3: Fetch file contents (Max 8 files to save Free Tier Quota) ──────
     const MAX_FILE_SIZE = 5 * 1024; // 5KB per file — fast enough, still useful
+    const MAX_FILES = 8;
     const fileContents = [];
+    let processedCount = 0;
 
-    for (const file of textFiles) {
+    for (const file of filesToProcess) {
+      if (processedCount >= MAX_FILES) break;
       try {
         const content = await githubService.getFileContent(owner, repo, file.path, token);
         if (content && content.trim().length > 0) {
@@ -119,6 +120,7 @@ class RAGService {
             path: file.path,
             content: content.slice(0, MAX_FILE_SIZE),
           });
+          processedCount++;
         }
       } catch (err) {
         console.warn(`[RAGService] Skipping file ${file.path}: ${err.message}`);
