@@ -35,7 +35,7 @@ When you paste a GitHub URL into CodeNova AI, the system instantly analyzes the 
 CodeNova AI uses a modern, disconnected full-stack architecture optimized for heavy AI workloads:
 
 - **Frontend (Vercel):** The Next.js dashboard is hosted on Vercel for lightning-fast edge delivery. It securely manages user interaction and connects seamlessly to the AI processing API.
-- **Backend (Railway):** The Node.js Express backend is deployed on a persistent server at Railway. This is fundamentally required over serverless options (like Vercel functions) because the AI vector memory must be held continuously during chat sessions.
+- **Backend (Render):** The Node.js Express backend is deployed on a persistent server at Render. This is fundamentally required over serverless options (like Vercel functions) because the AI vector memory must be held continuously during chat sessions.
 
 <br />
 
@@ -44,7 +44,7 @@ CodeNova AI uses a modern, disconnected full-stack architecture optimized for he
 - **✨ AI Explain:** Get a plain-English explanation of complex codebases.
 - **💬 AI Chat (RAG):** Ask natural language questions and get context-aware answers from the actual code.
 - **🐛 AI Debugger:** Paste an error message and get root-cause analysis with suggested fixes.
-- **📄 README Generator:** Auto-generate comprehensive, professional markdown documentation.
+- **📄 README Generator:** Auto-generate comprehensive, professional markdown documentation with a stunning custom-rendered UI preview.
 - **⚡ Improvements:** AI-powered suggestions for performance, security, and scalability.
 - **⚖️ Compare Repos:** Side-by-side AI analysis of two repositories.
 
@@ -63,8 +63,8 @@ Built with a modern, high-performance web stack:
 ### Backend
 - **Node.js** & **Express.js**
 - **MongoDB** (Session storage)
-- **OpenAI API** (GPT-4o for intelligence and text-embedding-3-small for embeddings)
-- **GitHub REST API** (Octokit)
+- **Google Gemini API** (`gemini-flash-lite-latest` for blazing-fast intelligence and `gemini-embedding-2` for embeddings)
+- **GitHub REST API** (Octokit, heavily parallelized for sub-1-second load times)
 - **In-Memory Vector Store** (For fast RAG retrieval)
 
 ---
