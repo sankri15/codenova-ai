@@ -234,4 +234,40 @@ router.post('/improve', async (req, res, next) => {
   }
 });
 
+// ─── POST /vision ─────────────────────────────────────────────────────────────
+/**
+ * Analyzes an image using GPT-4o Vision and codebase context.
+ *
+ * Body: { sessionId: string, image: string (base64), question: string, repoKey: string }
+ * Returns: { analysis: string }
+ */
+router.post('/vision', async (req, res, next) => {
+  try {
+    const { sessionId, image, question, repoKey } = req.body;
+
+    if (!image || typeof image !== 'string') {
+      return res.status(400).json({ error: 'image (base64) is required.' });
+    }
+    if (!question || typeof question !== 'string') {
+      return res.status(400).json({ error: 'question is required.' });
+    }
+    if (!repoKey) {
+      return res.status(400).json({ error: 'repoKey is required.' });
+    }
+
+    console.log(`[/vision] Analyzing image for ${repoKey} with question: "${question.slice(0, 80)}..."`);
+
+    // Search for code chunks relevant to the question
+    const contextChunks = await ragService.search(question, repoKey, 4);
+
+    // Perform Vision analysis
+    const analysis = await aiService.analyzeImage(sessionId, image, question, contextChunks);
+
+    console.log(`[/vision] Analysis complete (${analysis.length} chars)`);
+    return res.status(200).json({ analysis });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

@@ -11,6 +11,7 @@
 
 import aiService from './ai.js';
 import vectorStore from './vectorStore.js';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 
 // ─── Allowed Text File Extensions ────────────────────────────────────────────
 // Only process files with these extensions — binary files are excluded upstream
@@ -68,43 +69,15 @@ class RAGService {
     return TEXT_EXTENSIONS.has(ext);
   }
 
-  // ─── chunkText ──────────────────────────────────────────────────────────────
-  /**
-   * Splits text into overlapping chunks suitable for embedding.
-   *
-   * Uses a rough character-based heuristic: 1 token ≈ 4 characters.
-   * An overlap of 50 tokens means 200 chars of overlap to preserve context.
-   *
-   * @param {string} text       - Raw file content
-   * @param {number} chunkSize  - Target chunk size in tokens (default 500)
-   * @param {number} overlap    - Overlap between chunks in tokens (default 50)
-   * @returns {string[]} Array of text chunks
-   */
-  chunkText(text, chunkSize = 300, overlap = 30) {
+  async chunkText(text, chunkSize = 1200, overlap = 200) {
     if (!text || text.trim().length === 0) return [];
-
-    const chunkChars = chunkSize * 4;   // tokens → chars
-    const overlapChars = overlap * 4;    // overlap tokens → chars
-
-    const chunks = [];
-    let start = 0;
-
-    while (start < text.length) {
-      const end = Math.min(start + chunkChars, text.length);
-      const chunk = text.slice(start, end).trim();
-
-      if (chunk.length > 0) {
-        chunks.push(chunk);
-      }
-
-      // Move forward by chunkChars - overlapChars to create overlap
-      start += chunkChars - overlapChars;
-
-      // Avoid infinite loop if overlap >= chunkSize
-      if (chunkChars - overlapChars <= 0) break;
-    }
-
-    return chunks;
+    
+    const splitter = new RecursiveCharacterTextSplitter({
+      chunkSize: chunkSize,
+      chunkOverlap: overlap,
+    });
+    
+    return await splitter.splitText(text);
   }
 
   // ─── processRepository ──────────────────────────────────────────────────────
@@ -158,7 +131,7 @@ class RAGService {
     const allChunks = []; // { text, filePath, chunkIndex }
 
     for (const { path, content } of fileContents) {
-      const chunks = this.chunkText(content);
+      const chunks = await this.chunkText(content);
       chunks.forEach((text, chunkIndex) => {
         allChunks.push({ text, filePath: path, chunkIndex });
       });

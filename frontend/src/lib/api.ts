@@ -64,6 +64,13 @@ export async function debugError(sessionId: string, errorMessage: string, repoKe
   } catch (err) { return getError(err); }
 }
 
+export async function analyzeImage(sessionId: string, base64Image: string, question: string, repoKey: string) {
+  try {
+    const { data } = await api.post('/api/ai/vision', { sessionId, image: base64Image, question, repoKey });
+    return data;
+  } catch (err) { return getError(err); }
+}
+
 export async function generateReadme(sessionId: string, repoContext: unknown) {
   try {
     const { data } = await api.post('/api/ai/readme', { sessionId, repoContext });

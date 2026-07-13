@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Copy, Check, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, Copy, Check, AlertCircle, ImagePlus, X } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { chatWithRepo } from '@/lib/api';
+import { chatWithRepo, analyzeImage } from '@/lib/api';
 import { TypingDots } from './LoadingSkeleton';
 import toast from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  image?: string;
   sources?: string[];
   timestamp: Date;
 }
@@ -32,7 +33,6 @@ const SUGGESTIONS = [
   'How is error handling done?',
 ];
 
-// Parse code blocks from AI response
 function MessageContent({ content }: { content: string }) {
   const parts = content.split(/(```[\s\S]*?```)/g);
   return (
@@ -84,15 +84,16 @@ function CopyButton({ text }: { text: string }) {
 export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [image, setImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -100,29 +101,53 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
     }
   }, [input]);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
-    // Allow chat even while embedding — it will use whatever context is ready
     if (!isEmbedded) {
       toast('⚡ Analyzing with available context...', { icon: '🧠', duration: 2000 });
     }
 
+    const currentImage = image;
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
       content: text.trim(),
+      image: currentImage || undefined,
       timestamp: new Date(),
     };
+    
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    setImage(null);
     setIsLoading(true);
 
     try {
-      const result = await chatWithRepo(sessionId, text.trim(), repoKey);
+      let result;
+      if (currentImage) {
+        result = await analyzeImage(sessionId, currentImage, text.trim(), repoKey);
+      } else {
+        result = await chatWithRepo(sessionId, text.trim(), repoKey);
+      }
+      
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: result.answer,
+        content: result.analysis || result.answer,
         sources: result.sourcePaths || [],
         timestamp: new Date(),
       };
@@ -160,7 +185,7 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
         </div>
         <div>
           <h2 className="text-sm font-bold text-white">AI Codebase Chat</h2>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>RAG-powered · Ask anything about this repo</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>LangChain RAG-powered · Ask anything or upload screenshots</p>
         </div>
         <div className="ml-auto flex items-center gap-2 text-xs px-2.5 py-1 rounded-full"
           style={isEmbedded
@@ -184,7 +209,7 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
             </div>
             <div className="text-center">
               <h3 className="text-white font-semibold mb-1">Ask anything about this repo</h3>
-              <p className="text-white/40 text-sm">I have context from the entire codebase</p>
+              <p className="text-white/40 text-sm max-w-sm mx-auto">I have context from the entire codebase. You can even upload error screenshots!</p>
             </div>
             <div className="grid grid-cols-2 gap-2 max-w-lg w-full">
               {SUGGESTIONS.map((s) => (
@@ -224,6 +249,9 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
                     ? 'bg-gradient-to-br from-violet-600 to-purple-700 text-white rounded-tr-sm'
                     : 'glass text-white/90 rounded-tl-sm'
                 }`}>
+                  {msg.image && (
+                    <img src={msg.image} alt="Uploaded" className="max-w-full h-auto rounded-lg mb-3 object-contain bg-black/20" style={{ maxHeight: '200px' }} />
+                  )}
                   <MessageContent content={msg.content} />
                 </div>
 
@@ -269,8 +297,36 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-white/[0.06]">
+      <div className="p-4 border-t border-white/[0.06] flex flex-col gap-2">
+        {image && (
+          <div className="relative inline-block w-fit">
+            <img src={image} alt="Upload preview" className="h-20 w-auto rounded-lg border border-white/20 shadow-lg object-contain bg-black/40" />
+            <button
+              onClick={() => setImage(null)}
+              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors shadow-lg"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </div>
+        )}
+
         <div className="flex gap-3 items-end glass rounded-2xl p-3">
+          <input 
+            type="file" 
+            accept="image/*" 
+            className="hidden" 
+            ref={fileInputRef} 
+            onChange={handleImageUpload} 
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={!isEmbedded || isLoading}
+            title="Upload screenshot to debug"
+            className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all flex-shrink-0"
+          >
+            <ImagePlus className="w-4 h-4" />
+          </button>
+
           <textarea
             ref={textareaRef}
             value={input}
