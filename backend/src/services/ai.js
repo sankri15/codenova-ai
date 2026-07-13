@@ -279,12 +279,38 @@ HARD RULES:
 - Output raw markdown only, no code fences`
       );
 
-      // Strip any stray markdown fences the model may still add
-      const stripped = response
-        .replace(/^[\s\S]*?```(?:markdown|md)?\n/i, '')
-        .replace(/\n```[\s\S]*?$/i, '')
-        .trim();
-      return stripped || response.trim();
+      // ── Post-process: repair common AI markdown formatting failures ──────────
+      const repairMarkdown = (md) => {
+        return md
+          // 1. Strip stray code fences
+          .replace(/^[\s\S]*?```(?:markdown|md)?\n/i, '')
+          .replace(/\n```[\s\S]*?$/i, '')
+
+          // 2. Fix collapsed table rows: "| a | b | | c | d |" → "| a | b |\n| c | d |"
+          //    The AI sometimes puts multiple rows on one line
+          .replace(/\|\s*\|/g, '|\n|')
+
+          // 3. Ensure every | row is on its own line (split on pipe-end + pipe-start)
+          .replace(/(\|[^\n]+\|)(\s*)(\|)/g, '$1\n$3')
+
+          // 4. Ensure blank line BEFORE every ## heading (spacing between sections)
+          .replace(/([^\n])\n(#{1,4} )/g, '$1\n\n$2')
+
+          // 5. Ensure blank line AFTER every ## heading
+          .replace(/(#{1,4} [^\n]+)\n([^\n#|])/g, '$1\n\n$2')
+
+          // 6. Ensure blank line before and after every table block
+          .replace(/([^\n])\n(\|)/g, '$1\n\n$2')
+          .replace(/(\|[^\n]+)\n([^|\n])/g, '$1\n\n$2')
+
+          // 7. Ensure bullet points are on their own lines
+          .replace(/([^\n])\n([-*] )/g, '$1\n\n$2')
+
+          .trim();
+      };
+
+      const cleaned = repairMarkdown(response);
+      return cleaned || response.trim();
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
       throw err;
