@@ -2,83 +2,43 @@
  * ai.js — OpenAI service for CodeNova using LangChain (with demo-mode fallback).
  */
 
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatGoogleGenAI, GoogleGenAIEmbeddings } from '@langchain/google-genai';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// ─── Demo Mode Responses ──────────────────────────────────────────────────────
-const DEMO = {
-  explain: (ctx) => `# 🔍 Project Analysis: ${ctx?.name || 'Repository'}\n\n## What This Project Does\nThis is a **${ctx?.name || 'software project'}** built with ${Object.keys(ctx?.languages || {}).slice(0,3).join(', ') || 'modern technologies'}. It provides a robust solution for developers looking to streamline their workflow.\n\n## 🏗️ Architecture\nThe project follows a **modular architecture** with clear separation of concerns:\n- **Frontend Layer**: Handles all user interactions and UI rendering\n- **Backend/API Layer**: Manages business logic and data processing  \n- **Data Layer**: Handles persistence and state management\n\n## 🛠️ Tech Stack\n${Object.keys(ctx?.languages || {'JavaScript': 1, 'TypeScript': 1}).map(l => `- **${l}**`).join('\n')}\n${(ctx?.techStack || []).map(t => `- **${t}**`).join('\n')}\n\n## 👶 Beginner-Friendly Explanation\nThink of this project like a **well-organized office building**:\n- Each folder is a different department doing a specific job\n- Files are the documents each department uses\n- The main entry point is like the reception desk that routes requests\n\n## 📊 Key Patterns Detected\n- Component-based architecture for reusability\n- Async/await patterns for clean asynchronous code\n- Environment-based configuration for flexible deployment\n- RESTful API design for predictable interfaces`,
-  chat: (q) => `## Answer to: "${q}"\n\nBased on the repository structure and code patterns, here's what I found:\n\n**Direct Answer:**\nThe functionality you're asking about is typically handled in the core service layer of this application. Look for it in the main business logic files.\n\n**Where to Look:**\n\`\`\`\nsrc/\n├── services/     ← Core business logic lives here\n├── controllers/  ← Request handlers\n├── models/       ← Data structures\n└── utils/        ← Helper functions\n\`\`\`\n\n**Code Pattern Example:**\n\`\`\`javascript\n// This is the typical pattern used in this codebase\nasync function handleRequest(params) {\n  const validated = validateInput(params);\n  const result = await processData(validated);\n  return formatResponse(result);\n}\n\`\`\``,
-  debug: (err) => `## 🐛 Error Analysis\n\n**Error Detected:**\n\`\`\`\n${err?.slice(0, 200) || 'Unknown error'}\n\`\`\`\n\n## 🔍 Root Cause\nThis error typically occurs due to one of these reasons:\n1. **Null/Undefined Reference** — A variable is being accessed before initialization\n2. **Async Race Condition** — An async operation completed in unexpected order  \n3. **Missing Dependency** — A required module or package isn't installed/imported\n\n## ✅ Suggested Fix\n\n\`\`\`javascript\n// Option 1: Add null check\nif (!variable) {\n  throw new Error('Variable must be defined before use');\n}\n\n// Option 2: Use optional chaining\nconst value = object?.property?.nested ?? defaultValue;\n\n// Option 3: Ensure async/await is properly used\ntry {\n  const result = await someAsyncOperation();\n  // Use result here\n} catch (error) {\n  console.error('Operation failed:', error.message);\n}\n\`\`\`\n\n## 📁 Files to Check\n- Check your entry point file for initialization order\n- Verify all environment variables are set in \`.env\`\n- Ensure all dependencies are installed with \`npm install\``,
-  readme: (ctx) => `# ${ctx?.name || 'Project Name'}\n\n![Version](https://img.shields.io/badge/version-1.0.0-blue) ![License](https://img.shields.io/badge/license-MIT-green)\n\n> ${ctx?.description || 'A modern, production-ready application built with cutting-edge technologies.'}\n\n## ✨ Features\n\n- 🚀 **Fast Performance** — Optimized for speed and scalability\n- 🔒 **Secure** — Built with security best practices\n- 📱 **Responsive** — Works on all devices\n- 🧪 **Tested** — Comprehensive test coverage\n- 📦 **Easy Deploy** — One-command deployment\n\n## 🛠️ Tech Stack\n\n${Object.keys(ctx?.languages || {}).map(l => `![${l}](https://img.shields.io/badge/-${l}-informational)`).join(' ')}\n\n## 🚀 Quick Start\n\n\`\`\`bash\n# Clone the repository\ngit clone https://github.com/${ctx?.owner || 'username'}/${ctx?.name || 'repo'}.git\n\n# Navigate to project\ncd ${ctx?.name || 'repo'}\n\n# Install dependencies\nnpm install\n\n# Set up environment\ncp .env.example .env\n\n# Start development server\nnpm run dev\n\`\`\`\n\n## 📁 Project Structure\n\n\`\`\`\n${ctx?.name || 'project'}/\n├── src/              # Source code\n│   ├── components/   # Reusable components\n│   ├── services/     # Business logic\n│   ├── utils/        # Helper functions\n│   └── index.js      # Entry point\n├── tests/            # Test files\n├── docs/             # Documentation\n└── package.json      # Project configuration\n\`\`\`\n\n## 🤝 Contributing\n\n1. Fork the repository\n2. Create your feature branch: \`git checkout -b feature/AmazingFeature\`\n3. Commit changes: \`git commit -m 'Add AmazingFeature'\`\n4. Push to branch: \`git push origin feature/AmazingFeature\`\n5. Open a Pull Request\n\n## 📜 License\n\nMIT © ${new Date().getFullYear()} — Made with ❤️ by Sanjana Pal\n\n---\n*Generated by [CodeNova](http://localhost:3000) — AI GitHub Intelligence*`,
-  improve: () => ({
-    performance: [
-      { title: 'Enable Response Caching', description: 'Implement Redis or in-memory caching for frequently accessed data to reduce database load by up to 80%.', severity: 'high' },
-      { title: 'Add Code Splitting', description: 'Implement dynamic imports and lazy loading to reduce initial bundle size and improve Time to Interactive.', severity: 'medium' },
-      { title: 'Optimize Database Queries', description: 'Add proper indexes on frequently queried fields and use query optimization techniques like projection and aggregation.', severity: 'high' },
-      { title: 'Implement CDN for Static Assets', description: 'Serve images, CSS, and JS through a CDN to reduce latency globally.', severity: 'medium' },
-    ],
-    security: [
-      { title: 'Add Rate Limiting', description: 'Implement per-IP rate limiting on all API endpoints to prevent abuse and DDoS attacks.', severity: 'critical' },
-      { title: 'Sanitize All Inputs', description: 'Ensure all user inputs are validated and sanitized before processing to prevent injection attacks.', severity: 'critical' },
-      { title: 'Enable HTTPS Everywhere', description: 'Force HTTPS and set Strict-Transport-Security headers for all endpoints.', severity: 'high' },
-      { title: 'Implement JWT Refresh Tokens', description: 'Use short-lived access tokens with refresh token rotation for better security.', severity: 'high' },
-    ],
-    quality: [
-      { title: 'Add Unit Tests', description: 'Increase test coverage to at least 80% with unit and integration tests using Jest or Vitest.', severity: 'high' },
-      { title: 'Set Up ESLint + Prettier', description: 'Enforce consistent code style across the codebase with automated formatting and linting rules.', severity: 'medium' },
-      { title: 'Add TypeScript Strict Mode', description: 'Enable strict TypeScript checks to catch type errors at compile time and improve code reliability.', severity: 'medium' },
-      { title: 'Implement Error Boundaries', description: 'Add React Error Boundaries to gracefully handle UI errors without crashing the entire application.', severity: 'low' },
-    ],
-    scaling: [
-      { title: 'Containerize with Docker', description: 'Package the application in Docker containers for consistent deployment across environments.', severity: 'high' },
-      { title: 'Add Horizontal Scaling', description: 'Design stateless services that can be scaled horizontally behind a load balancer.', severity: 'high' },
-      { title: 'Implement Message Queue', description: 'Use a message queue (RabbitMQ/Redis) for async task processing to decouple services.', severity: 'medium' },
-      { title: 'Add Monitoring & Alerting', description: 'Integrate monitoring (Datadog/Grafana) and set up alerts for errors and performance degradation.', severity: 'medium' },
-    ],
-  }),
-  compare: (r1, r2) => ({
-    overview: `Comparing **${r1?.name || 'Repo 1'}** vs **${r2?.name || 'Repo 2'}**: Both repositories serve similar purposes but differ significantly in approach, community size, and ecosystem maturity.`,
-    differences: `**${r1?.name}** focuses on simplicity and developer experience with a smaller footprint, while **${r2?.name}** offers more features and a larger ecosystem. Their architecture philosophies differ in how they handle state management and data flow.`,
-    similarities: 'Both projects are open-source, actively maintained, and follow modern software development practices. They share similar deployment patterns and community-driven development models.',
-    recommendation: `For most use cases, **${r1?.stars > r2?.stars ? r1?.name : r2?.name}** is recommended due to its larger community, better documentation, and more active maintenance. However, if you need specific features, evaluate based on your project requirements.`,
-  }),
-};
-
 // ─── AI Service Class (LangChain) ─────────────────────────────────────────────
 class AIService {
   constructor() {
-    const apiKey = process.env.OPENAI_API_KEY;
+    // We expect the user to provide a GOOGLE_API_KEY in their .env
+    const apiKey = process.env.GOOGLE_API_KEY;
     this.demoMode = false;
 
     if (!apiKey) {
-      console.warn('[AIService] ⚠️  OPENAI_API_KEY is missing! API calls will fail.');
+      console.warn('[AIService] ⚠️  GOOGLE_API_KEY is missing! API calls will fail.');
     }
     
-    // Initialize LangChain Models
-    this.chatModel = new ChatOpenAI({
-      modelName: 'gpt-4o',
+    // Initialize LangChain Models with Gemini
+    this.chatModel = new ChatGoogleGenAI({
+      modelName: 'gemini-1.5-flash',
       temperature: 0.7,
-      openAIApiKey: apiKey || 'missing'
+      apiKey: apiKey || 'missing'
     });
 
-    this.jsonModel = new ChatOpenAI({
-      modelName: 'gpt-4o',
+    this.jsonModel = new ChatGoogleGenAI({
+      modelName: 'gemini-1.5-flash',
       temperature: 0.7,
-      openAIApiKey: apiKey || 'missing',
-      modelKwargs: { response_format: { type: 'json_object' } }
+      apiKey: apiKey || 'missing',
+      // Gemini 1.5 supports JSON mode
+      modelKwargs: { response_mime_type: "application/json" }
     });
 
-    this.embeddings = new OpenAIEmbeddings({
-      modelName: 'text-embedding-3-small',
-      openAIApiKey: apiKey || 'missing',
-      batchSize: 512,
-      maxRetries: 0
+    this.embeddings = new GoogleGenAIEmbeddings({
+      modelName: 'text-embedding-004',
+      apiKey: apiKey || 'missing'
     });
 
-    console.log('[AIService] ✅ LangChain initialized');
+    console.log('[AIService] ✅ LangChain initialized with Gemini 1.5 Flash');
   }
 
   async createEmbedding(text) {
