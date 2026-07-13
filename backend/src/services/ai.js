@@ -16,13 +16,13 @@ class AIService {
     }
 
     this.ai = new GoogleGenAI({ apiKey: apiKey || '' });
-    console.log('[AIService] ✅ Initialized with Gemini 1.5 Flash (@google/genai v1)');
+    console.log('[AIService] ✅ Initialized with Gemini Flash Latest (@google/genai v1)');
   }
 
   // ── Internal: text-only chat ───────────────────────────────────────────────
   async _generate(systemPrompt, userPrompt) {
     const response = await this.ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-flash-latest',
       contents: `${systemPrompt}\n\n${userPrompt}`,
     });
     return response.text;
@@ -35,7 +35,7 @@ class AIService {
     const base64Data = matches ? matches[2] : base64DataUrl;
 
     const response = await this.ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-flash-latest',
       contents: [
         { text: `${systemPrompt}\n\n${userPrompt}` },
         { inlineData: { mimeType, data: base64Data } },
@@ -48,7 +48,7 @@ class AIService {
   async createEmbedding(text) {
     try {
       const response = await this.ai.models.embedContent({
-        model: 'text-embedding-004',
+        model: 'gemini-embedding-2',
         contents: text.replace(/\n/g, ' ').slice(0, 8000),
       });
       return response.embeddings[0].values;
@@ -64,7 +64,7 @@ class AIService {
     for (const text of texts) {
       try {
         const response = await this.ai.models.embedContent({
-          model: 'text-embedding-004',
+          model: 'gemini-embedding-2',
           contents: text.replace(/\n/g, ' ').slice(0, 8000),
         });
         results.push(response.embeddings[0].values);
