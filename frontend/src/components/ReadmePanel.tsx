@@ -194,18 +194,19 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
               ) : (
                 <div className="prose prose-invert prose-sm max-w-none
                   prose-headings:text-white prose-headings:font-bold
-                  prose-h1:text-2xl prose-h1:mb-4 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-3
-                  prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3
-                  prose-h3:text-base prose-h3:mt-4
-                  prose-p:text-white/70 prose-p:leading-relaxed
+                  prose-h1:text-3xl prose-h1:mb-10 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-4
+                  prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:border-b prose-h2:border-white/5 prose-h2:pb-2
+                  prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
+                  prose-p:text-white/80 prose-p:leading-relaxed prose-p:mb-6
                   prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline
-                  prose-code:text-cyan-300 prose-code:bg-white/5 prose-code:rounded prose-code:px-1 prose-code:text-xs
-                  prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl
-                  prose-li:text-white/70
+                  prose-code:text-cyan-300 prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
+                  prose-pre:bg-[#0A0A12] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl prose-pre:mb-8
+                  prose-li:text-white/80 prose-li:mb-2
+                  prose-ul:mb-8 prose-ol:mb-8
                   prose-strong:text-white
-                  prose-blockquote:border-violet-500 prose-blockquote:text-white/50
-                  prose-table:text-white/70 prose-th:text-white prose-th:bg-white/5
-                  prose-img:rounded-lg">
+                  prose-blockquote:border-l-4 prose-blockquote:border-violet-500 prose-blockquote:bg-violet-500/5 prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg prose-blockquote:mb-8 prose-blockquote:text-white/60
+                  prose-table:text-white/80 prose-th:text-white prose-th:bg-white/5 prose-table:mb-8
+                  prose-img:rounded-lg prose-img:mb-8">
                   <ReactMarkdown>{readme}</ReactMarkdown>
                 </div>
               )}

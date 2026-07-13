@@ -192,8 +192,8 @@ Write an extremely detailed explanation (at least 500 words) with these sections
   // ── Generate README ────────────────────────────────────────────────────────
   async generateReadme(repoContext) {
     try {
-      return await this._generate(
-        'You are an expert technical writer and open-source maintainer. Create a professional, extremely comprehensive, and beautifully structured README.md. Use badges, emojis, tables, and rich formatting. It must be very detailed (at least 800 words).',
+      const response = await this._generate(
+        'You are an expert technical writer and open-source maintainer. Create a professional, extremely comprehensive, and beautifully structured README.md. Use badges, emojis, tables, and rich formatting. It must be very detailed (at least 800 words). Do NOT wrap your entire response in a markdown code block, just output the raw markdown text.',
         `Generate a complete, production-ready README.md for:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
@@ -203,6 +203,9 @@ Tech Stack: ${(repoContext.techStack || []).join(', ')}
 
 Make sure to include comprehensive installation steps, usage examples, API documentation (if applicable), and a beautiful architecture overview.`
       );
+      
+      // Clean up any outer markdown fences that the model might accidentally add
+      return response.replace(/^```(markdown|md)?\n/i, '').replace(/\n```$/i, '').trim();
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
       throw err;
