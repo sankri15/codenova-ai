@@ -85,8 +85,10 @@ class AIService {
       }));
       return response.embeddings[0].values;
     } catch (err) {
-      console.warn('[AIService] Embedding failed:', err.message);
-      throw err;
+      console.warn('[AIService] Embedding failed (Quota Exceeded?), using generic fallback:', err.message);
+      // Fallback: return a zero vector so the server doesn't crash.
+      // Chat and Debugger will just use generic/top file context instead of perfect semantic match.
+      return new Array(768).fill(0);
     }
   }
 
