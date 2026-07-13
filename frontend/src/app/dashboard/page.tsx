@@ -6,6 +6,8 @@ import { Sparkles, GitBranch, Loader2, Zap, Star, GitFork, Eye, Code2, Users, Cl
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from 'next/navigation';
 
 import Sidebar from '@/components/Sidebar';
@@ -391,16 +393,67 @@ function ExplainPanel({ sessionId, repoContext }: { sessionId: string; repoConte
                 </div>
               </div>
 
-              {/* Markdown Content */}
-              <div className="p-8 prose prose-invert max-w-none
-                  prose-headings:text-white prose-headings:font-bold
-                  prose-h1:text-2xl prose-h1:mb-4 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-3 prose-h1:text-[#FF6B35]
-                  prose-h2:text-xl prose-h2:mt-12 prose-h2:mb-5
-                  prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px]
-                  prose-li:text-white/80 prose-li:text-[15px]
-                  prose-strong:text-white
-                  prose-code:text-[#FF6B35] prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm">
-                <ReactMarkdown>{explanation || 'No explanation available.'}</ReactMarkdown>
+              {/* Markdown Content — custom components for guaranteed spacing */}
+              <div className="p-8">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => (
+                      <div style={{ paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
+                        <h1 style={{ color: '#FF6B35', fontSize: '2rem', fontWeight: 800, borderBottom: '2px solid rgba(255,107,53,0.3)', paddingBottom: '1rem', marginBottom: '1.8rem', lineHeight: 1.3 }}>{children}</h1>
+                      </div>
+                    ),
+                    h2: ({ children }) => (
+                      <div style={{ paddingTop: '2.5rem', marginTop: '0.5rem' }}>
+                        <h2 style={{ color: '#FF6B35', fontSize: '1.45rem', fontWeight: 700, borderBottom: '1px solid rgba(255,107,53,0.25)', paddingBottom: '0.7rem', marginBottom: '1.4rem', lineHeight: 1.35 }}>{children}</h2>
+                      </div>
+                    ),
+                    h3: ({ children }) => (
+                      <div style={{ paddingTop: '1.8rem' }}>
+                        <h3 style={{ color: '#00FF87', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.9rem' }}>{children}</h3>
+                      </div>
+                    ),
+                    h4: ({ children }) => (
+                      <div style={{ paddingTop: '1.2rem' }}>
+                        <h4 style={{ color: '#FFE600', fontSize: '1rem', fontWeight: 600, marginBottom: '0.7rem' }}>{children}</h4>
+                      </div>
+                    ),
+                    p: ({ children }) => (
+                      <p style={{ color: 'rgba(255,255,255,0.82)', fontSize: '15px', lineHeight: '2.0', marginBottom: '1.2rem' }}>{children}</p>
+                    ),
+                    ul: ({ children }) => (
+                      <ul style={{ paddingLeft: '1.6rem', marginBottom: '1.8rem', marginTop: '0.5rem', listStyleType: 'disc' }}>{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol style={{ paddingLeft: '1.6rem', marginBottom: '1.8rem', marginTop: '0.5rem', listStyleType: 'decimal' }}>{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li style={{ color: 'rgba(255,255,255,0.82)', fontSize: '15px', lineHeight: '1.95', marginBottom: '0.6rem' }}>{children}</li>
+                    ),
+                    strong: ({ children }) => (
+                      <strong style={{ color: '#ffffff', fontWeight: 700 }}>{children}</strong>
+                    ),
+                    hr: () => (
+                      <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '2.5rem 0' }} />
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote style={{ borderLeft: '4px solid #FF6B35', background: 'linear-gradient(90deg, rgba(255,107,53,0.08), transparent)', padding: '0.8rem 1.5rem', borderRadius: '0 12px 12px 0', marginBottom: '1.8rem', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>{children}</blockquote>
+                    ),
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    code: ({ inline, className, children, ...props }: any) => {
+                      const match = /language-(\w+)/.exec(className || '');
+                      return !inline && match ? (
+                        <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div"
+                          customStyle={{ borderRadius: '10px', marginBottom: '1.5rem', fontSize: '13px', border: '1px solid rgba(255,255,255,0.08)', background: '#0A0A12' }} {...props}>
+                          {String(children).replace(/\n$/, '')}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#FF6B35', borderRadius: '5px', padding: '2px 7px', fontSize: '13px', fontFamily: 'monospace' }} {...props}>{children}</code>
+                      );
+                    },
+                  }}
+                >
+                  {explanation || 'No explanation available.'}
+                </ReactMarkdown>
               </div>
             </div>
           </Card3D>
