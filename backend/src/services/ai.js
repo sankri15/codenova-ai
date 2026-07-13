@@ -43,7 +43,7 @@ class AIService {
   async _generate(systemPrompt, userPrompt) {
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-flash-latest',
+        model: 'gemini-flash-lite-latest',
         contents: `${systemPrompt}\n\n${userPrompt}`,
       });
       return response.text;
@@ -58,7 +58,7 @@ class AIService {
 
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-flash-latest',
+        model: 'gemini-flash-lite-latest',
         contents: [
           { text: `${systemPrompt}\n\n${userPrompt}` },
           { inlineData: { mimeType, data: base64Data } },
@@ -208,7 +208,7 @@ Tech Stack: ${(repoContext.techStack || []).join(', ')}`
   async suggestImprovements(repoContext) {
     try {
       const response = await this._withRetry(() => this.ai.models.generateContent({
-        model: 'gemini-flash-latest',
+        model: 'gemini-flash-lite-latest',
         contents: [
           { text: 'You are a senior software engineer.' },
           { text: `Return a JSON object with keys: performance, security, quality, scaling.
@@ -233,7 +233,7 @@ Tech: ${(repoContext.techStack || []).join(', ')}` }
   async compareRepos(repo1Context, repo2Context) {
     try {
       const response = await this._withRetry(() => this.ai.models.generateContent({
-        model: 'gemini-flash-latest',
+        model: 'gemini-flash-lite-latest',
         contents: [
           { text: 'You are a tech analyst.' },
           { text: `Compare these two repos. Return a concise JSON object with keys: overview, differences, similarities, recommendation.
