@@ -261,7 +261,18 @@ IMPORTANT: This MUST be a markdown table listing the real dependencies detected 
 
 ## 📁 Project Structure
 
-CRITICAL: MUST be a markdown table. NEVER use ASCII trees (├──, └──, │). Use ONLY actual files from the file list above.
+First show a visual tree using a bash code block (use 📦 📂 📄 emojis, ├── └── │ characters):
+
+\`\`\`bash
+📦 ${repoContext.name}
+├── 📂 [real folder from file list]/
+│   ├── 📄 [real file]
+│   └── 📄 [real file]
+├── 📄 [real root file]
+└── 📄 [real root file]
+\`\`\`
+
+Then show the same structure as a markdown table:
 
 | File / Folder | Type | Description |
 | :--- | :--- | :--- |
