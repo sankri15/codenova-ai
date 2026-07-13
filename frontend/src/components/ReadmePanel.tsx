@@ -23,44 +23,44 @@ type ViewMode = 'preview' | 'raw';
 const makeMarkdownComponents = () => ({
   h1: ({ children }: { children: React.ReactNode }) => (
     <h1 style={{
-      fontSize: '2rem', fontWeight: 800, color: '#e6edf3',
-      marginTop: '0', marginBottom: '1.5rem', paddingBottom: '0.75rem',
+      fontSize: '2.1rem', fontWeight: 800, color: '#e6edf3',
+      marginTop: '0', marginBottom: '2rem', paddingBottom: '1rem',
       borderBottom: '1px solid #30363d', lineHeight: 1.3,
     }}>{children}</h1>
   ),
   h2: ({ children }: { children: React.ReactNode }) => (
     <h2 style={{
-      fontSize: '1.5rem', fontWeight: 700, color: '#58a6ff',
-      marginTop: '3rem', marginBottom: '1.2rem', paddingBottom: '0.5rem',
+      fontSize: '1.55rem', fontWeight: 700, color: '#58a6ff',
+      marginTop: '4rem', marginBottom: '1.5rem', paddingBottom: '0.6rem',
       borderBottom: '1px solid rgba(88,166,255,0.2)', lineHeight: 1.35,
     }}>{children}</h2>
   ),
   h3: ({ children }: { children: React.ReactNode }) => (
     <h3 style={{
       fontSize: '1.2rem', fontWeight: 700, color: '#3fb950',
-      marginTop: '2rem', marginBottom: '0.9rem', lineHeight: 1.4,
+      marginTop: '2.5rem', marginBottom: '1rem', lineHeight: 1.4,
     }}>{children}</h3>
   ),
   h4: ({ children }: { children: React.ReactNode }) => (
     <h4 style={{
       fontSize: '1rem', fontWeight: 700, color: '#d29922',
-      marginTop: '1.5rem', marginBottom: '0.7rem',
+      marginTop: '2rem', marginBottom: '0.8rem',
     }}>{children}</h4>
   ),
   p: ({ children }: { children: React.ReactNode }) => (
     <p style={{
-      color: '#c9d1d9', fontSize: '15px', lineHeight: '1.85',
-      marginBottom: '1.2rem',
+      color: '#c9d1d9', fontSize: '15px', lineHeight: '1.9',
+      marginBottom: '1.5rem',
     }}>{children}</p>
   ),
   ul: ({ children }: { children: React.ReactNode }) => (
-    <ul style={{ paddingLeft: '1.75rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>{children}</ul>
+    <ul style={{ paddingLeft: '1.75rem', marginBottom: '2rem', marginTop: '0.5rem', listStyleType: 'disc' }}>{children}</ul>
   ),
   ol: ({ children }: { children: React.ReactNode }) => (
-    <ol style={{ paddingLeft: '1.75rem', marginBottom: '1.5rem', listStyleType: 'decimal' }}>{children}</ol>
+    <ol style={{ paddingLeft: '1.75rem', marginBottom: '2rem', marginTop: '0.5rem', listStyleType: 'decimal' }}>{children}</ol>
   ),
   li: ({ children }: { children: React.ReactNode }) => (
-    <li style={{ color: '#c9d1d9', fontSize: '15px', lineHeight: '1.85', marginBottom: '0.5rem' }}>{children}</li>
+    <li style={{ color: '#c9d1d9', fontSize: '15px', lineHeight: '1.9', marginBottom: '0.75rem' }}>{children}</li>
   ),
   strong: ({ children }: { children: React.ReactNode }) => (
     <strong style={{ color: '#e6edf3', fontWeight: 700 }}>{children}</strong>
@@ -99,13 +99,13 @@ const makeMarkdownComponents = () => ({
     );
   },
   blockquote: ({ children }: { children: React.ReactNode }) => (
-    <blockquote style={{ borderLeft: '4px solid #3fb950', background: 'rgba(63,185,80,0.05)', padding: '0.6rem 1.25rem', borderRadius: '0 8px 8px 0', marginBottom: '1.5rem', color: '#8b949e', fontStyle: 'italic' }}>
+    <blockquote style={{ borderLeft: '4px solid #3fb950', background: 'rgba(63,185,80,0.05)', padding: '0.8rem 1.5rem', borderRadius: '0 8px 8px 0', marginBottom: '2rem', marginTop: '0.5rem', color: '#8b949e', fontStyle: 'italic' }}>
       {children}
     </blockquote>
   ),
-  hr: () => <hr style={{ border: 'none', borderTop: '1px solid #30363d', margin: '2.5rem 0' }} />,
+  hr: () => <hr style={{ border: 'none', borderTop: '1px solid #30363d', margin: '3rem 0' }} />,
   table: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ overflowX: 'auto', marginBottom: '2rem', borderRadius: '8px', border: '1px solid #30363d' }}>
+    <div style={{ overflowX: 'auto', marginBottom: '2.5rem', marginTop: '0.75rem', borderRadius: '8px', border: '1px solid #30363d' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>{children}</table>
     </div>
   ),
@@ -117,10 +117,10 @@ const makeMarkdownComponents = () => ({
     <tr style={{ borderBottom: '1px solid #21262d' }}>{children}</tr>
   ),
   th: ({ children }: { children: React.ReactNode }) => (
-    <th style={{ padding: '10px 16px', textAlign: 'left', color: '#8b949e', fontWeight: 600, fontSize: '13px' }}>{children}</th>
+    <th style={{ padding: '12px 18px', textAlign: 'left', color: '#8b949e', fontWeight: 600, fontSize: '13px' }}>{children}</th>
   ),
   td: ({ children }: { children: React.ReactNode }) => (
-    <td style={{ padding: '10px 16px', color: '#c9d1d9', borderRight: '1px solid #21262d', verticalAlign: 'top' }}>{children}</td>
+    <td style={{ padding: '12px 18px', color: '#c9d1d9', borderRight: '1px solid #21262d', verticalAlign: 'top', lineHeight: '1.7' }}>{children}</td>
   ),
 });
 
@@ -345,7 +345,7 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
                   </div>
 
                   {/* README Markdown body */}
-                  <div style={{ padding: '2rem 2.5rem 3rem' }}>
+                  <div style={{ padding: '2.5rem 3rem 4rem' }}>
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                       {readme}
                     </ReactMarkdown>
