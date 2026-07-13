@@ -200,7 +200,7 @@ Owner: ${repoContext.owner}
 Description: ${repoContext.description}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 
-You MUST strictly follow this exact template structure and use these exact emojis for the headers:
+You MUST strictly follow this exact template structure and use these exact emojis for the headers. Make every single section EXTREMELY long, detailed, and highly descriptive. Write at least 1500 words total.
 
 # ${repoContext.name}
 A brief highly professional one-line description.
@@ -208,25 +208,25 @@ A brief highly professional one-line description.
 ![Banner](https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop)
 
 ## 🚀 Overview
-[Detailed overview of the project]
+[Extremely detailed and long overview of the project, spanning multiple paragraphs]
 
 ## 🖼️ How It Works
-[Explain the core mechanics, UI, and how users interact with it]
+[Deep explanation of the core mechanics, UI, and how users interact with it, highly detailed]
 
 ## 🌍 Architecture
-[Explain the frontend, backend, and deployment architecture]
+[Deep explanation of the frontend, backend, and deployment architecture]
 
 ## ✨ Features
-[List of features with emojis]
+[Exhaustive list of every single feature with emojis and deep explanations]
 
 ## 🛠️ Tech Stack
-[Categorized tech stack]
+[Categorized tech stack with detailed explanations for why each tech was chosen]
 
 ## 📁 Project Structure
-[Markdown tree of the codebase]
+[Detailed Markdown tree of the codebase with explanations for key folders]
 
 ## 💻 Getting Started
-[Step-by-step setup instructions]
+[Extremely detailed, step-by-step setup instructions]
 
 ## 👨💻 Author
 [Author details]
