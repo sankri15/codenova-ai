@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motio
 import { Sparkles, GitBranch, Loader2, Zap, Star, GitFork, Eye, Code2, Users, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
+import ReactMarkdown from 'react-markdown';
 import { useSearchParams } from 'next/navigation';
 
 import Sidebar from '@/components/Sidebar';
@@ -355,26 +356,52 @@ function ExplainPanel({ sessionId, repoContext }: { sessionId: string; repoConte
 
   return (
     <div className="h-full overflow-y-auto px-6 py-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5" style={{ color: '#FF6B35' }} />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <Sparkles className="w-6 h-6" style={{ color: '#FF6B35' }} />
           AI Project Explanation
         </h2>
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               className="w-12 h-12 rounded-full"
               style={{ border: '2px solid rgba(255,107,53,0.15)', borderTopColor: '#FF6B35' }}
             />
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>AI is analyzing the codebase...</p>
+            <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Analyzing the repository architecture...</p>
           </div>
         ) : (
           <Card3D>
-            <div className="rounded-2xl p-6 whitespace-pre-wrap text-sm leading-relaxed"
-              style={{ background: 'rgba(255,107,53,0.04)', border: '1px solid rgba(255,107,53,0.15)', color: 'rgba(255,255,255,0.75)', transformStyle: 'preserve-3d' }}>
-              {explanation || 'No explanation available.'}
+            <div className="rounded-2xl overflow-hidden"
+              style={{ background: 'rgba(20,20,30,0.4)', border: '1px solid rgba(255,107,53,0.2)', transformStyle: 'preserve-3d' }}>
+              
+              {/* Beautiful Banner Image */}
+              <div className="w-full h-48 relative overflow-hidden bg-[#0A0A12]">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#14141E] to-transparent z-10" />
+                <img 
+                  src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop" 
+                  alt="AI Cyber Core" 
+                  className="w-full h-full object-cover opacity-60"
+                />
+                <div className="absolute bottom-4 left-6 z-20">
+                  <div className="px-3 py-1 bg-[#FF6B35]/20 border border-[#FF6B35]/40 text-[#FF6B35] rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md inline-block">
+                    Architecture Deep Dive
+                  </div>
+                </div>
+              </div>
+
+              {/* Markdown Content */}
+              <div className="p-8 prose prose-invert max-w-none
+                  prose-headings:text-white prose-headings:font-bold
+                  prose-h1:text-2xl prose-h1:mb-4 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-3 prose-h1:text-[#FF6B35]
+                  prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4
+                  prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px]
+                  prose-li:text-white/80 prose-li:text-[15px]
+                  prose-strong:text-white
+                  prose-code:text-[#FF6B35] prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm">
+                <ReactMarkdown>{explanation || 'No explanation available.'}</ReactMarkdown>
+              </div>
             </div>
           </Card3D>
         )}

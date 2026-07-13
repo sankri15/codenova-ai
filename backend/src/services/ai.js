@@ -109,7 +109,7 @@ class AIService {
         : 'Not available';
 
       return await this._generate(
-        'You are an expert software architect. Explain codebases clearly using markdown. Be extremely concise, brief, and to the point to ensure fast generation.',
+        'You are an expert software architect. Explain codebases clearly using markdown. Write a very detailed, extremely comprehensive, and beautifully structured technical deep-dive. Use emojis and rich markdown formatting.',
         `Analyze this GitHub repository:
 
 Repository: ${repoContext.name}
@@ -118,11 +118,12 @@ Languages: ${JSON.stringify(repoContext.languages)}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 Files: ${fileNames}
 
-Write a brief explanation with these short sections:
-# What This Project Does
-# Architecture Overview
-# Tech Stack Breakdown
-# Beginner-Friendly Explanation`
+Write an extremely detailed explanation (at least 500 words) with these sections:
+# 🚀 What This Project Does
+# 🏗️ Architecture Overview
+# 💻 Tech Stack Breakdown
+# 🧩 Key Design Patterns
+# 🎓 Beginner-Friendly Explanation`
       );
     } catch (err) {
       console.warn('[AIService] explainProject failed:', err.message);
@@ -192,13 +193,15 @@ Write a brief explanation with these short sections:
   async generateReadme(repoContext) {
     try {
       return await this._generate(
-        'You are a technical writer. Create a professional, comprehensive README with badges, emojis, and clear structure.',
-        `Generate a complete README.md for:
+        'You are an expert technical writer and open-source maintainer. Create a professional, extremely comprehensive, and beautifully structured README.md. Use badges, emojis, tables, and rich formatting. It must be very detailed (at least 800 words).',
+        `Generate a complete, production-ready README.md for:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description}
 Languages: ${JSON.stringify(repoContext.languages)}
-Tech Stack: ${(repoContext.techStack || []).join(', ')}`
+Tech Stack: ${(repoContext.techStack || []).join(', ')}
+
+Make sure to include comprehensive installation steps, usage examples, API documentation (if applicable), and a beautiful architecture overview.`
       );
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
