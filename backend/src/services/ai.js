@@ -43,7 +43,7 @@ class AIService {
   async _generate(systemPrompt, userPrompt) {
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-flash-lite-latest',
+        model: 'gemini-1.5-flash',
         contents: `${systemPrompt}\n\n${userPrompt}`,
       });
       return response.text;
@@ -118,7 +118,7 @@ Languages: ${JSON.stringify(repoContext.languages)}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
 Files: ${fileNames}
 
-Write an extremely detailed explanation (at least 500 words) with these sections:
+Write a concise, high-impact technical explanation with these sections:
 # 🚀 What This Project Does
 # 🏗️ Architecture Overview
 # 💻 Tech Stack Breakdown
@@ -194,7 +194,7 @@ Write an extremely detailed explanation (at least 500 words) with these sections
     try {
       // Build real file list from actual repo data
       const files = Array.isArray(repoContext.fileTree)
-        ? repoContext.fileTree.slice(0, 40).map(f => f.path || f).join('\n')
+        ? repoContext.fileTree.slice(0, 20).map(f => f.path || f).join('\n')
         : 'Not available';
 
       const langs = repoContext.languages
