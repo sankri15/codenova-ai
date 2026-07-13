@@ -395,7 +395,7 @@ function ExplainPanel({ sessionId, repoContext }: { sessionId: string; repoConte
               <div className="p-8 prose prose-invert max-w-none
                   prose-headings:text-white prose-headings:font-bold
                   prose-h1:text-2xl prose-h1:mb-4 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-3 prose-h1:text-[#FF6B35]
-                  prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4
+                  prose-h2:text-xl prose-h2:mt-12 prose-h2:mb-5
                   prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px]
                   prose-li:text-white/80 prose-li:text-[15px]
                   prose-strong:text-white

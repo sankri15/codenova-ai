@@ -32,33 +32,33 @@ const markdownComponents = {
     </div>
   ),
 
-  // H2 — cyan, HUGE top gap so sections feel very separate
+  // H2 — cyan, ~3 line gap above so sections feel clearly separate
   h2: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ paddingTop: '4rem', marginTop: '1rem' }}>
+    <div style={{ paddingTop: '2.5rem', marginTop: '0.5rem' }}>
       <h2 style={{
         color: '#00F5FF', fontSize: '1.6rem', fontWeight: 700,
         borderBottom: '1px solid rgba(0,245,255,0.25)', paddingBottom: '0.8rem',
-        marginBottom: '1.8rem', lineHeight: 1.35,
+        marginBottom: '1.5rem', lineHeight: 1.35,
       }}>{children}</h2>
     </div>
   ),
 
   // H3 — green
   h3: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ paddingTop: '2.5rem' }}>
+    <div style={{ paddingTop: '1.8rem' }}>
       <h3 style={{
         color: '#00FF87', fontSize: '1.25rem', fontWeight: 700,
-        marginBottom: '1rem', lineHeight: 1.4,
+        marginBottom: '0.9rem', lineHeight: 1.4,
       }}>{children}</h3>
     </div>
   ),
 
   // H4 — yellow
   h4: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ paddingTop: '1.5rem' }}>
+    <div style={{ paddingTop: '1.2rem' }}>
       <h4 style={{
         color: '#FFE600', fontSize: '1.05rem', fontWeight: 600,
-        marginBottom: '0.8rem',
+        marginBottom: '0.7rem',
       }}>{children}</h4>
     </div>
   ),
@@ -81,9 +81,9 @@ const markdownComponents = {
     }}>{children}</blockquote>
   ),
 
-  // Horizontal rule — generous space
+  // Horizontal rule — 3 line gap
   hr: () => (
-    <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '3.5rem 0' }} />
+    <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '2.5rem 0' }} />
   ),
 
   // Unordered list
