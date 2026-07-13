@@ -1,10 +1,9 @@
 /**
  * ai.js — Google Gemini AI service for CodeNova.
- * Uses the official @google/generative-ai SDK directly (no LangChain wrapper)
- * to avoid v1beta API version compatibility issues.
+ * Uses the NEW official @google/genai SDK (v1 API — no v1beta issues).
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -16,44 +15,43 @@ class AIService {
       console.warn('[AIService] ⚠️  GOOGLE_API_KEY is missing!');
     }
 
-    this.genAI = new GoogleGenerativeAI(apiKey || '');
-
-    // Chat model — gemini-1.5-flash is fast and free-tier friendly
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-    // Embedding model
-    this.embeddingModel = this.genAI.getGenerativeModel({ model: 'text-embedding-004' });
-
-    console.log('[AIService] ✅ Initialized with Gemini 1.5 Flash (official SDK)');
+    this.ai = new GoogleGenAI({ apiKey: apiKey || '' });
+    console.log('[AIService] ✅ Initialized with Gemini 1.5 Flash (@google/genai v1)');
   }
 
-  // ── Internal helper: send a prompt and get text back ──────────────────────
-  async _chat(systemPrompt, userPrompt) {
-    const result = await this.model.generateContent([
-      { text: `${systemPrompt}\n\n${userPrompt}` }
-    ]);
-    return result.response.text();
+  // ── Internal: text-only chat ───────────────────────────────────────────────
+  async _generate(systemPrompt, userPrompt) {
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: `${systemPrompt}\n\n${userPrompt}`,
+    });
+    return response.text;
   }
 
-  // ── Internal helper: send a prompt with an image ──────────────────────────
-  async _chatWithImage(systemPrompt, userPrompt, base64DataUrl) {
-    // Extract mime type and base64 data from data URL
+  // ── Internal: chat with image ──────────────────────────────────────────────
+  async _generateWithImage(systemPrompt, userPrompt, base64DataUrl) {
     const matches = base64DataUrl.match(/^data:(.+);base64,(.+)$/);
     const mimeType = matches ? matches[1] : 'image/png';
     const base64Data = matches ? matches[2] : base64DataUrl;
 
-    const result = await this.model.generateContent([
-      { text: `${systemPrompt}\n\n${userPrompt}` },
-      { inlineData: { mimeType, data: base64Data } }
-    ]);
-    return result.response.text();
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: [
+        { text: `${systemPrompt}\n\n${userPrompt}` },
+        { inlineData: { mimeType, data: base64Data } },
+      ],
+    });
+    return response.text;
   }
 
   // ── Embeddings ─────────────────────────────────────────────────────────────
   async createEmbedding(text) {
     try {
-      const result = await this.embeddingModel.embedContent(text.replace(/\n/g, ' ').slice(0, 8000));
-      return result.embedding.values;
+      const response = await this.ai.models.embedContent({
+        model: 'text-embedding-004',
+        contents: text.replace(/\n/g, ' ').slice(0, 8000),
+      });
+      return response.embeddings[0].values;
     } catch (err) {
       console.warn('[AIService] Embedding failed:', err.message);
       throw err;
@@ -62,15 +60,17 @@ class AIService {
 
   async createEmbeddings(texts) {
     if (!texts?.length) return [];
-    // Process in batches to avoid rate limits
     const results = [];
     for (const text of texts) {
       try {
-        const result = await this.embeddingModel.embedContent(text.replace(/\n/g, ' ').slice(0, 8000));
-        results.push(result.embedding.values);
+        const response = await this.ai.models.embedContent({
+          model: 'text-embedding-004',
+          contents: text.replace(/\n/g, ' ').slice(0, 8000),
+        });
+        results.push(response.embeddings[0].values);
       } catch (err) {
-        console.warn('[AIService] Batch embedding item failed, skipping:', err.message);
-        results.push(new Array(768).fill(0)); // text-embedding-004 returns 768 dims
+        console.warn('[AIService] Embedding item failed, using zeros:', err.message);
+        results.push(new Array(768).fill(0));
       }
     }
     return results;
@@ -79,26 +79,24 @@ class AIService {
   // ── Explain project ────────────────────────────────────────────────────────
   async explainProject(repoContext) {
     try {
-      return await this._chat(
-        'You are an expert software architect who explains codebases clearly and thoroughly. Use markdown formatting.',
-        `Analyze this GitHub repository and provide a comprehensive explanation.
+      return await this._generate(
+        'You are an expert software architect. Explain codebases clearly using markdown formatting.',
+        `Analyze this GitHub repository:
 
 Repository: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description || 'No description'}
 Languages: ${JSON.stringify(repoContext.languages)}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
-File Structure (sample):
+File Structure:
 ${repoContext.fileTree || 'Not available'}
 
-Provide a detailed explanation with these sections:
+Write a detailed explanation with these sections:
 # What This Project Does
 # Architecture Overview
 # Tech Stack Breakdown
 # Key Design Patterns
-# Beginner-Friendly Explanation
-
-Be specific and insightful.`
+# Beginner-Friendly Explanation`
       );
     } catch (err) {
       console.warn('[AIService] explainProject failed:', err.message);
@@ -110,7 +108,7 @@ Be specific and insightful.`
   async chatWithRepo(question, contextChunks) {
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
-      return await this._chat(
+      return await this._generate(
         'You are an expert code assistant. Answer questions about the codebase using the provided file context. Be specific, reference file names, and include code examples when helpful.',
         `Code context:\n\n${context}\n\nQuestion: ${question}`
       );
@@ -124,7 +122,7 @@ Be specific and insightful.`
   async analyzeImage(sessionId, base64Image, question, contextChunks) {
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
-      return await this._chatWithImage(
+      return await this._generateWithImage(
         'You are an expert UI/UX developer and debugger with perfect vision. Cross-reference what you see in the screenshot with the codebase context.',
         `Code Context:\n${context}\n\nQuestion: ${question}`,
         base64Image
@@ -139,8 +137,8 @@ Be specific and insightful.`
   async debugError(errorMessage, contextChunks) {
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
-      return await this._chat(
-        'You are an expert debugger. Analyze errors using the codebase context and provide root cause analysis with specific fixes.',
+      return await this._generate(
+        'You are an expert debugger. Analyze errors using codebase context and give root cause + specific fix with code.',
         `Error:\n${errorMessage}\n\nCode context:\n${context}\n\nProvide: 1) Error type 2) Root cause 3) Specific fix with code 4) Files to check`
       );
     } catch (err) {
@@ -153,8 +151,8 @@ Be specific and insightful.`
   async debugImageError(errorMessage, base64Image, contextChunks) {
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
-      return await this._chatWithImage(
-        'You are an expert debugger with perfect vision. Read error traces from screenshots and cross-reference them with the codebase context.',
+      return await this._generateWithImage(
+        'You are an expert debugger with perfect vision. Read error traces from screenshots and cross-reference with codebase context.',
         `Error:\n${errorMessage}\n\nCode Context:\n${context}\n\nProvide: 1) Error type 2) Root cause 3) Specific fix with code 4) Files to check`,
         base64Image
       );
@@ -167,15 +165,14 @@ Be specific and insightful.`
   // ── Generate README ────────────────────────────────────────────────────────
   async generateReadme(repoContext) {
     try {
-      return await this._chat(
-        'You are a technical writer who creates professional, comprehensive README files. Use badges, emojis, and clear structure.',
+      return await this._generate(
+        'You are a technical writer. Create a professional, comprehensive README with badges, emojis, and clear structure.',
         `Generate a complete README.md for:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
 Description: ${repoContext.description}
 Languages: ${JSON.stringify(repoContext.languages)}
-Tech Stack: ${(repoContext.techStack || []).join(', ')}
-Files: ${repoContext.fileTree?.slice(0, 500) || 'N/A'}`
+Tech Stack: ${(repoContext.techStack || []).join(', ')}`
       );
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
@@ -186,16 +183,15 @@ Files: ${repoContext.fileTree?.slice(0, 500) || 'N/A'}`
   // ── Suggest improvements ───────────────────────────────────────────────────
   async suggestImprovements(repoContext) {
     try {
-      const raw = await this._chat(
-        'You are a senior software engineer. Return ONLY valid JSON — no markdown, no code fences, just raw JSON.',
-        `Analyze this repo and return a JSON object with exactly these keys: performance, security, quality, scaling.
-Each key maps to an array of objects with: title (string), description (string), severity ("low"|"medium"|"high"|"critical").
+      const raw = await this._generate(
+        'You are a senior software engineer. Return ONLY raw valid JSON — no markdown fences, no explanation.',
+        `Return a JSON object with keys: performance, security, quality, scaling.
+Each is an array of: {title, description, severity ("low"|"medium"|"high"|"critical")}.
 
 Repo: ${repoContext.name}
 Languages: ${JSON.stringify(repoContext.languages)}
 Tech: ${(repoContext.techStack || []).join(', ')}`
       );
-      // Strip potential markdown fences before parsing
       const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       return JSON.parse(cleaned);
     } catch (err) {
@@ -207,9 +203,9 @@ Tech: ${(repoContext.techStack || []).join(', ')}`
   // ── Compare repos ──────────────────────────────────────────────────────────
   async compareRepos(repo1Context, repo2Context) {
     try {
-      const raw = await this._chat(
-        'You are a tech analyst. Return ONLY valid JSON — no markdown, no code fences, just raw JSON.',
-        `Compare these two repos and return a JSON object with keys: overview, differences, similarities, recommendation.
+      const raw = await this._generate(
+        'You are a tech analyst. Return ONLY raw valid JSON — no markdown fences, no explanation.',
+        `Compare these two repos. Return JSON with keys: overview, differences, similarities, recommendation.
 Repo1: ${JSON.stringify(repo1Context)}
 Repo2: ${JSON.stringify(repo2Context)}`
       );
