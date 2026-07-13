@@ -43,8 +43,12 @@ class AIService {
   async _generate(systemPrompt, userPrompt) {
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-1.5-flash-8b',
         contents: `${systemPrompt}\n\n${userPrompt}`,
+        config: {
+          temperature: 0, // Removes sampling overhead for instant greedy decoding
+          maxOutputTokens: 1024, // Capping tokens drastically cuts generation time
+        }
       });
       return response.text;
     });
@@ -58,11 +62,15 @@ class AIService {
 
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-flash-lite-latest',
+        model: 'gemini-1.5-flash-8b',
         contents: [
           { text: `${systemPrompt}\n\n${userPrompt}` },
           { inlineData: { mimeType, data: base64Data } },
         ],
+        config: {
+          temperature: 0,
+          maxOutputTokens: 1024,
+        }
       });
       return response.text;
     });
