@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     description: 'Understand any GitHub codebase in seconds — powered by CodeNova AI',
     type: 'website',
   },
+}
+
+export const viewport = {
   themeColor: '#05050F',
 }
 
