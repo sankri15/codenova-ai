@@ -311,21 +311,19 @@ export default function ChatPanel({ sessionId, repoKey, isEmbedded }: ChatPanelP
         )}
 
         <div className="flex gap-3 items-end glass rounded-2xl p-3">
-          <input 
-            type="file" 
-            accept="image/*" 
-            className="hidden" 
-            ref={fileInputRef} 
-            onChange={handleImageUpload} 
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={!isEmbedded || isLoading}
+          <label
             title="Upload screenshot to debug"
-            className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all flex-shrink-0"
+            className={`w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all flex-shrink-0 cursor-pointer ${(!isEmbedded || isLoading) ? 'opacity-40 pointer-events-none' : ''}`}
           >
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              onChange={handleImageUpload}
+              disabled={!isEmbedded || isLoading}
+            />
             <ImagePlus className="w-4 h-4" />
-          </button>
+          </label>
 
           <textarea
             ref={textareaRef}
