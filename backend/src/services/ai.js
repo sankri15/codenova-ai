@@ -34,7 +34,7 @@ class AIService {
     });
 
     this.embeddings = new GoogleGenerativeAIEmbeddings({
-      model: 'text-embedding-004',
+      model: 'embedding-001',
       apiKey: apiKey || 'missing'
     });
 
