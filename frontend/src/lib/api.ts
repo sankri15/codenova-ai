@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://codenova-backend-m8wr.onrender.com';
+const API_BASE = 'https://codenova-backend-m8wr.onrender.com';
 
 // Helper: read GitHub token from localStorage (set by user in Settings)
 function getGithubToken(): string {
