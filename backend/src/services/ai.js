@@ -43,11 +43,11 @@ class AIService {
   async _generate(systemPrompt, userPrompt) {
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-flash-lite-latest',
         contents: `${systemPrompt}\n\n${userPrompt}`,
         config: {
-          temperature: 0, // Removes sampling overhead for instant greedy decoding
-          maxOutputTokens: 1024, // Capping tokens drastically cuts generation time
+          temperature: 0,
+          maxOutputTokens: 1024,
         }
       });
       return response.text;
@@ -62,7 +62,7 @@ class AIService {
 
     return this._withRetry(async () => {
       const response = await this.ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-flash-lite-latest',
         contents: [
           { text: `${systemPrompt}\n\n${userPrompt}` },
           { inlineData: { mimeType, data: base64Data } },
