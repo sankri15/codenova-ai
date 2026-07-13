@@ -39,29 +39,28 @@ router.post('/embed', async (req, res, next) => {
 
     console.log(`[/embed] Starting RAG for ${owner}/${repo} (token: ${ghToken ? 'yes' : 'no'})`);
 
-    const result = await ragService.processRepository(owner, repo, githubService, ghToken);
-
-    // Update session record if MongoDB is available
-    if (sessionId && mongoose.connection.readyState === 1) {
-      Session.findOneAndUpdate(
-        { sessionId },
-        {
-          vectorized: true,
-          totalChunks: result.totalChunks,
-          filesProcessed: result.filesProcessed,
+    // Run RAG processing in the background so the frontend unlocks instantly
+    ragService.processRepository(owner, repo, githubService, ghToken)
+      .then((result) => {
+        if (sessionId && mongoose.connection.readyState === 1) {
+          Session.findOneAndUpdate(
+            { sessionId },
+            {
+              vectorized: true,
+              totalChunks: result.totalChunks,
+              filesProcessed: result.filesProcessed,
+            }
+          ).catch((err) => console.warn('[/embed] Failed to update session:', err.message));
         }
-      ).catch((err) => {
-        console.warn('[/embed] Failed to update session:', err.message);
-      });
-    }
-
-    console.log(`[/embed] Done: ${result.totalChunks} chunks from ${result.filesProcessed} files`);
+        console.log(`[/embed] Done: ${result.totalChunks} chunks from ${result.filesProcessed} files`);
+      })
+      .catch((err) => console.error('[/embed] Background processing failed:', err.message));
 
     return res.status(200).json({
       success: true,
-      totalChunks: result.totalChunks,
-      filesProcessed: result.filesProcessed,
-      message: `Successfully embedded ${result.totalChunks} chunks from ${result.filesProcessed} files.`,
+      totalChunks: 0,
+      filesProcessed: 0,
+      message: `Embedding started in the background. AI is ready immediately.`,
     });
   } catch (err) {
     next(err);
