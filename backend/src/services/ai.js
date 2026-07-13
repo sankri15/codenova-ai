@@ -217,11 +217,13 @@ Tech Stack: ${(repoContext.techStack || []).join(', ')}
 Actual Files:
 ${files}
 
-OUTPUT THIS EXACT STRUCTURE — no deviations:
+OUTPUT THIS EXACT STRUCTURE — no deviations. Put --- between every section for clear separation:
 
 # ${repoContext.name}
 
 > One-line professional tagline specific to this repo.
+
+---
 
 ## 🚀 Overview
 
@@ -230,25 +232,42 @@ OUTPUT THIS EXACT STRUCTURE — no deviations:
 - [bullet: key value proposition]
 - [bullet: what makes it unique]
 
+---
+
 ## ✨ Features
 
-- 🔹 **[Feature Name]:** [one-line description] — repeat for every real feature
+- 🔹 **[Feature Name]:** [one-line description] — repeat for EVERY real feature
 - 🔹 **[Feature Name]:** [one-line description]
+
+---
 
 ## 🛠️ Tech Stack
 
 | Category | Technology | Purpose |
 | :--- | :--- | :--- |
-| [fill from real tech stack above] | ... | ... |
+| [fill every row from real tech stack data above] | ... | ... |
+
+---
+
+## 📦 Key Libraries & Dependencies
+
+IMPORTANT: This MUST be a markdown table listing the real dependencies detected from package.json or requirements.txt found in the file list.
+
+| Library / Package | Version | Purpose |
+| :--- | :--- | :--- |
+| [real dependency name] | latest | [what it does in this project] |
+
+---
 
 ## 📁 Project Structure
 
-CRITICAL: You MUST render this section as a Markdown table. NEVER use ASCII trees (├──, └──, │).
-Use ONLY the actual files listed above.
+CRITICAL: MUST be a markdown table. NEVER use ASCII trees (├──, └──, │). Use ONLY actual files from the file list above.
 
 | File / Folder | Type | Description |
 | :--- | :--- | :--- |
-| [real file or folder from file list] | File/Directory | [what it does] |
+| [real file or folder name] | File/Directory | [what it does] |
+
+---
 
 ## 🌍 Architecture
 
@@ -256,12 +275,16 @@ Use ONLY the actual files listed above.
 | :--- | :--- | :--- |
 | [fill based on actual tech stack] | ... | ... |
 
+---
+
 ## 💻 Getting Started
 
 1. **Clone:** \`git clone https://github.com/${repoContext.owner}/${repoContext.name}.git\`
 2. **Install:** [real install command based on detected stack]
 3. **Configure:** [real config steps]
 4. **Run:** [real run command]
+
+---
 
 ## 👨‍💻 Author
 
@@ -272,9 +295,10 @@ Use ONLY the actual files listed above.
 *Built with ❤️ — auto-documented by [CodeNova AI](https://codenova-ai-ivory.vercel.app)*
 
 HARD RULES:
+- Put --- between EVERY section
 - NEVER use ASCII tree characters (├ └ │ ─)
-- Project Structure MUST be a markdown table
-- Every table must have header + separator rows
+- Project Structure and Libraries MUST be markdown tables
+- Every table must have header + | :--- | separator rows on their OWN lines
 - Use only bullet points or tables — zero prose paragraphs
 - Output raw markdown only, no code fences`
       );

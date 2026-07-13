@@ -254,21 +254,21 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
                     {/* ── Markdown body — IDENTICAL prose classes to ExplainPanel ── */}
                     <div className="p-8 prose prose-invert max-w-none
                         prose-headings:font-bold
-                        prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-2 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-4 prose-h1:text-[#FF6B35]
-                        prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-5 prose-h2:text-[#00F5FF]
-                        prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-[#00FF87]
-                        prose-h4:text-base prose-h4:mt-6 prose-h4:mb-3 prose-h4:text-[#FFE600]
-                        prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-4
-                        prose-li:text-white/80 prose-li:text-[15px] prose-li:mb-2
-                        prose-ul:mb-6 prose-ul:mt-2
-                        prose-ol:mb-6 prose-ol:mt-2
+                        prose-h1:text-2xl prose-h1:mb-8 prose-h1:mt-2 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-4 prose-h1:text-[#FF6B35]
+                        prose-h2:text-xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:text-[#00F5FF] prose-h2:border-b prose-h2:border-[#00F5FF]/20 prose-h2:pb-3
+                        prose-h3:text-lg prose-h3:mt-10 prose-h3:mb-4 prose-h3:text-[#00FF87]
+                        prose-h4:text-base prose-h4:mt-8 prose-h4:mb-3 prose-h4:text-[#FFE600]
+                        prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-5
+                        prose-li:text-white/80 prose-li:text-[15px] prose-li:mb-2.5
+                        prose-ul:mb-8 prose-ul:mt-3
+                        prose-ol:mb-8 prose-ol:mt-3
                         prose-strong:text-white
-                        prose-blockquote:border-l-[#FF6B35] prose-blockquote:text-white/60
+                        prose-blockquote:border-l-[#FF6B35] prose-blockquote:text-white/60 prose-blockquote:my-6
                         prose-code:text-[#FF6B35] prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
                         prose-table:border-collapse prose-table:w-full
-                        prose-th:text-white/60 prose-th:font-semibold prose-th:text-sm prose-th:py-3 prose-th:px-4 prose-th:border prose-th:border-white/10
+                        prose-th:text-white/60 prose-th:font-semibold prose-th:text-sm prose-th:py-3 prose-th:px-4 prose-th:border prose-th:border-white/10 prose-th:bg-white/5
                         prose-td:py-3 prose-td:px-4 prose-td:border prose-td:border-white/10 prose-td:text-white/75 prose-td:text-sm
-                        prose-hr:border-white/10 prose-hr:my-8">
+                        prose-hr:border-white/10 prose-hr:my-10">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm]}
                         components={{ code: CodeBlock }}
