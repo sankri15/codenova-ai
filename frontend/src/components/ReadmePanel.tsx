@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Copy, Check, Download, Eye, Code } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { generateReadme } from '@/lib/api';
@@ -18,6 +19,141 @@ interface ReadmePanelProps {
 
 type ViewMode = 'preview' | 'raw';
 
+// ─── Custom Markdown Components for a GitHub-style render ────────────────────
+const markdownComponents: object = {
+  // H1 — Violet, huge, bold, underline separator
+  h1: ({ children }: { children: React.ReactNode }) => (
+    <h1 style={{ color: '#a78bfa', fontSize: '2.5rem', fontWeight: 800, marginTop: '0.5rem', marginBottom: '2rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', letterSpacing: '-0.5px' }}>
+      {children}
+    </h1>
+  ),
+  // H2 — Cyan, large, spaced generously with a divider below
+  h2: ({ children }: { children: React.ReactNode }) => (
+    <h2 style={{ color: '#22d3ee', fontSize: '1.75rem', fontWeight: 700, marginTop: '4rem', marginBottom: '1.5rem', paddingBottom: '0.75rem', borderBottom: '1px solid rgba(34,211,238,0.15)', letterSpacing: '-0.3px' }}>
+      {children}
+    </h2>
+  ),
+  // H3 — Fuchsia, medium
+  h3: ({ children }: { children: React.ReactNode }) => (
+    <h3 style={{ color: '#e879f9', fontSize: '1.35rem', fontWeight: 700, marginTop: '2.5rem', marginBottom: '1rem' }}>
+      {children}
+    </h3>
+  ),
+  // H4 — Amber/gold
+  h4: ({ children }: { children: React.ReactNode }) => (
+    <h4 style={{ color: '#fbbf24', fontSize: '1.1rem', fontWeight: 600, marginTop: '2rem', marginBottom: '0.75rem' }}>
+      {children}
+    </h4>
+  ),
+  // Paragraph — spacious, readable
+  p: ({ children }: { children: React.ReactNode }) => (
+    <p style={{ color: 'rgba(255,255,255,0.80)', fontSize: '15px', lineHeight: '2.0', marginBottom: '1.5rem' }}>
+      {children}
+    </p>
+  ),
+  // Image — medium width, centered, with glow border
+  img: ({ src, alt }: { src?: string; alt?: string }) => (
+    <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0 3rem 0' }}>
+      <img
+        src={src}
+        alt={alt || ''}
+        style={{ maxWidth: '700px', width: '100%', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 40px rgba(139,92,246,0.2)' }}
+      />
+    </div>
+  ),
+  // Unordered list
+  ul: ({ children }: { children: React.ReactNode }) => (
+    <ul style={{ paddingLeft: '1.5rem', marginBottom: '2rem', listStyleType: 'disc' }}>
+      {children}
+    </ul>
+  ),
+  // Ordered list
+  ol: ({ children }: { children: React.ReactNode }) => (
+    <ol style={{ paddingLeft: '1.5rem', marginBottom: '2rem', listStyleType: 'decimal' }}>
+      {children}
+    </ol>
+  ),
+  // List item
+  li: ({ children }: { children: React.ReactNode }) => (
+    <li style={{ color: 'rgba(255,255,255,0.80)', fontSize: '15px', lineHeight: '1.9', marginBottom: '0.6rem' }}>
+      {children}
+    </li>
+  ),
+  // Strong/bold
+  strong: ({ children }: { children: React.ReactNode }) => (
+    <strong style={{ color: '#ffffff', fontWeight: 700 }}>{children}</strong>
+  ),
+  // Inline code
+  code: ({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) => {
+    const match = /language-(\w+)/.exec(className || '');
+    return !inline && match ? (
+      <SyntaxHighlighter
+        style={vscDarkPlus}
+        language={match[1]}
+        PreTag="div"
+        customStyle={{ borderRadius: '12px', marginBottom: '2rem', fontSize: '13px', border: '1px solid rgba(255,255,255,0.08)', background: '#0A0A12' }}
+        {...props}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    ) : (
+      <code style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: '#67e8f9', borderRadius: '6px', padding: '2px 8px', fontSize: '13px', fontFamily: 'monospace' }} {...props}>
+        {children}
+      </code>
+    );
+  },
+  // Blockquote
+  blockquote: ({ children }: { children: React.ReactNode }) => (
+    <blockquote style={{ borderLeft: '4px solid #e879f9', background: 'linear-gradient(90deg, rgba(232,121,249,0.08), transparent)', padding: '0.75rem 1.5rem', borderRadius: '0 12px 12px 0', marginBottom: '2rem', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>
+      {children}
+    </blockquote>
+  ),
+  // Horizontal rule
+  hr: () => (
+    <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '3rem 0' }} />
+  ),
+  // TABLE — fully styled with borders and alternating rows
+  table: ({ children }: { children: React.ReactNode }) => (
+    <div style={{ overflowX: 'auto', marginBottom: '2.5rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+        {children}
+      </table>
+    </div>
+  ),
+  thead: ({ children }: { children: React.ReactNode }) => (
+    <thead style={{ background: 'rgba(139,92,246,0.15)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      {children}
+    </thead>
+  ),
+  tbody: ({ children }: { children: React.ReactNode }) => (
+    <tbody>{children}</tbody>
+  ),
+  tr: ({ children }: { children: React.ReactNode }) => (
+    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      {children}
+    </tr>
+  ),
+  th: ({ children }: { children: React.ReactNode }) => (
+    <th style={{ padding: '12px 16px', textAlign: 'left', color: '#a78bfa', fontWeight: 700, fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+      {children}
+    </th>
+  ),
+  td: ({ children }: { children: React.ReactNode }) => (
+    <td style={{ padding: '12px 16px', color: 'rgba(255,255,255,0.75)', borderRight: '1px solid rgba(255,255,255,0.04)', verticalAlign: 'top' }}>
+      {children}
+    </td>
+  ),
+  // Link
+  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#818cf8', textDecoration: 'none' }}
+      onMouseOver={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+      onMouseOut={(e) => (e.currentTarget.style.textDecoration = 'none')}>
+      {children}
+    </a>
+  ),
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps) {
   const [readme, setReadme] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -60,20 +196,20 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between">
+      <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
             <FileText className="w-4 h-4 text-white" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-white">README Generator</h2>
-            <p className="text-xs text-white/40">Auto-generate a professional README.md</p>
+            <p className="text-xs text-white/40">Preview renders like a real GitHub page</p>
           </div>
         </div>
 
         {readme && (
           <div className="flex items-center gap-2">
-            {/* View mode toggle */}
+            {/* View toggle */}
             <div className="flex items-center bg-white/[0.04] rounded-lg p-1 border border-white/10">
               <button
                 onClick={() => setViewMode('preview')}
@@ -128,16 +264,13 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
               <div className="text-center max-w-sm">
                 <h3 className="text-white font-semibold text-lg mb-2">Generate Professional README</h3>
                 <p className="text-white/40 text-sm leading-relaxed">
-                  AI will analyze your codebase and create a comprehensive README with project description,
-                  installation guide, usage examples, API docs, and more.
+                  AI will analyze your codebase and create a professional, beautifully styled README just like a real GitHub repository page.
                 </p>
               </div>
-
-              {/* Preview structure */}
               <div className="glass rounded-xl p-5 max-w-md w-full">
                 <p className="text-xs text-white/40 mb-3 uppercase tracking-wider font-mono">Will include:</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Project Title & Badges', 'Features List', 'Installation Guide', 'Usage Examples', 'Folder Structure', 'Tech Stack', 'API Endpoints', 'Deployment Guide'].map((item) => (
+                  {['Project Header & Banner', 'Overview & Architecture', 'Features List', 'Tech Stack Table', 'Project Structure Table', 'Setup Instructions', 'Author Details', 'Badges & Icons'].map((item) => (
                     <div key={item} className="flex items-center gap-2 text-xs text-white/60">
                       <Check className="w-3 h-3 text-green-400 flex-shrink-0" />
                       {item}
@@ -145,7 +278,6 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
                   ))}
                 </div>
               </div>
-
               <button
                 onClick={handleGenerate}
                 className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2"
@@ -179,35 +311,28 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
               key="readme"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-6"
+              className="p-8"
             >
               {viewMode === 'raw' ? (
+                // ── RAW view: pure markdown code ───────────────────────────
                 <div className="rounded-xl overflow-hidden border border-white/10 text-xs">
                   <SyntaxHighlighter
                     language="markdown"
                     style={vscDarkPlus}
-                    customStyle={{ margin: 0, padding: '1.5rem', background: 'rgba(0,0,0,0.4)' }}
+                    customStyle={{ margin: 0, padding: '1.5rem', background: 'rgba(5,5,15,0.8)', fontSize: '12.5px', lineHeight: '1.7' }}
                   >
                     {readme}
                   </SyntaxHighlighter>
                 </div>
               ) : (
-                <div className="prose prose-invert prose-sm max-w-none antialiased
-                  prose-headings:font-extrabold prose-headings:tracking-tight
-                  prose-h1:text-4xl prose-h1:text-violet-400 prose-h1:mb-12 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-6
-                  prose-h2:text-3xl prose-h2:text-cyan-400 prose-h2:mt-16 prose-h2:mb-10 prose-h2:border-b prose-h2:border-white/5 prose-h2:pb-4
-                  prose-h3:text-2xl prose-h3:text-fuchsia-400 prose-h3:mt-12 prose-h3:mb-8
-                  prose-p:text-white/80 prose-p:leading-[2.2] prose-p:mb-8 prose-p:text-[15px]
-                  prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline
-                  prose-code:text-cyan-300 prose-code:bg-white/5 prose-code:rounded prose-code:px-2 prose-code:py-1 prose-code:text-[13px] prose-code:font-mono
-                  prose-pre:bg-[#0A0A12] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:mb-10 prose-pre:shadow-2xl
-                  prose-li:text-white/80 prose-li:mb-4 prose-li:leading-[2]
-                  prose-ul:mb-10 prose-ol:mb-10
-                  prose-strong:text-white prose-strong:font-bold
-                  prose-blockquote:border-l-4 prose-blockquote:border-fuchsia-500 prose-blockquote:bg-gradient-to-r prose-blockquote:from-fuchsia-500/10 prose-blockquote:to-transparent prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:mb-10 prose-blockquote:text-white/70 prose-blockquote:font-medium
-                  prose-table:text-white/80 prose-th:text-white prose-th:bg-white/5 prose-table:mb-10
-                  prose-img:rounded-2xl prose-img:mb-12 prose-img:max-w-2xl prose-img:mx-auto prose-img:shadow-[0_0_40px_rgba(139,92,246,0.15)] prose-img:border prose-img:border-white/10">
-                  <ReactMarkdown>{readme}</ReactMarkdown>
+                // ── PREVIEW view: beautifully rendered, GitHub-like ─────────
+                <div style={{ maxWidth: '860px', margin: '0 auto' }}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={markdownComponents}
+                  >
+                    {readme}
+                  </ReactMarkdown>
                 </div>
               )}
             </motion.div>
