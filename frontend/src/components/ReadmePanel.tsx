@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, Copy, Check, Download, Eye, Code } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { generateReadme } from '@/lib/api';
 import { Skeleton } from './LoadingSkeleton';
 import toast from 'react-hot-toast';
@@ -180,9 +182,15 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
               className="p-6"
             >
               {viewMode === 'raw' ? (
-                <pre className="text-xs text-green-300/80 font-mono whitespace-pre-wrap bg-black/40 rounded-xl p-6 border border-white/10 overflow-x-auto">
-                  {readme}
-                </pre>
+                <div className="rounded-xl overflow-hidden border border-white/10 text-xs">
+                  <SyntaxHighlighter
+                    language="markdown"
+                    style={vscDarkPlus}
+                    customStyle={{ margin: 0, padding: '1.5rem', background: 'rgba(0,0,0,0.4)' }}
+                  >
+                    {readme}
+                  </SyntaxHighlighter>
+                </div>
               ) : (
                 <div className="prose prose-invert prose-sm max-w-none
                   prose-headings:text-white prose-headings:font-bold

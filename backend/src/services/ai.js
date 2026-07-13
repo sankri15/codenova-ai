@@ -207,17 +207,22 @@ Tech Stack: ${(repoContext.techStack || []).join(', ')}`
   // ── Suggest improvements ───────────────────────────────────────────────────
   async suggestImprovements(repoContext) {
     try {
-      const raw = await this._generate(
-        'You are a senior software engineer. Return ONLY raw valid JSON — no markdown fences, no explanation.',
-        `Return a JSON object with keys: performance, security, quality, scaling.
-Each is an array of: {title, description, severity ("low"|"medium"|"high"|"critical")}.
+      const response = await this._withRetry(() => this.ai.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: [
+          { text: 'You are a senior software engineer.' },
+          { text: `Return a JSON object with keys: performance, security, quality, scaling.
+Each key maps to an array of max 2 objects with: title (string), description (string), severity ("low"|"medium"|"high"|"critical"). Be extremely concise to generate quickly.
 
 Repo: ${repoContext.name}
 Languages: ${JSON.stringify(repoContext.languages)}
-Tech: ${(repoContext.techStack || []).join(', ')}`
-      );
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      return JSON.parse(cleaned);
+Tech: ${(repoContext.techStack || []).join(', ')}` }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+        }
+      }));
+      return JSON.parse(response.text);
     } catch (err) {
       console.warn('[AIService] suggestImprovements failed:', err.message);
       throw err;
@@ -227,14 +232,19 @@ Tech: ${(repoContext.techStack || []).join(', ')}`
   // ── Compare repos ──────────────────────────────────────────────────────────
   async compareRepos(repo1Context, repo2Context) {
     try {
-      const raw = await this._generate(
-        'You are a tech analyst. Return ONLY raw valid JSON — no markdown fences, no explanation.',
-        `Compare these two repos. Return JSON with keys: overview, differences, similarities, recommendation.
+      const response = await this._withRetry(() => this.ai.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: [
+          { text: 'You are a tech analyst.' },
+          { text: `Compare these two repos. Return a concise JSON object with keys: overview, differences, similarities, recommendation.
 Repo1: ${JSON.stringify(repo1Context)}
-Repo2: ${JSON.stringify(repo2Context)}`
-      );
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      return JSON.parse(cleaned);
+Repo2: ${JSON.stringify(repo2Context)}` }
+        ],
+        config: {
+          responseMimeType: 'application/json',
+        }
+      }));
+      return JSON.parse(response.text);
     } catch (err) {
       throw new Error(`Comparison failed: ${err.message}`);
     }
