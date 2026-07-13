@@ -19,157 +19,62 @@ interface ReadmePanelProps {
 
 type ViewMode = 'preview' | 'raw';
 
-// ─── GitHub-style dark markdown components ───────────────────────────────────
-const makeMarkdownComponents = () => ({
-  h1: ({ children }: { children: React.ReactNode }) => (
-    <h1 style={{
-      fontSize: '2.1rem', fontWeight: 800, color: '#e6edf3',
-      marginTop: '0', marginBottom: '2rem', paddingBottom: '1rem',
-      borderBottom: '1px solid #30363d', lineHeight: 1.3,
-    }}>{children}</h1>
-  ),
-  h2: ({ children }: { children: React.ReactNode }) => (
-    <h2 style={{
-      fontSize: '1.55rem', fontWeight: 700, color: '#58a6ff',
-      marginTop: '4rem', marginBottom: '1.5rem', paddingBottom: '0.6rem',
-      borderBottom: '1px solid rgba(88,166,255,0.2)', lineHeight: 1.35,
-    }}>{children}</h2>
-  ),
-  h3: ({ children }: { children: React.ReactNode }) => (
-    <h3 style={{
-      fontSize: '1.2rem', fontWeight: 700, color: '#3fb950',
-      marginTop: '2.5rem', marginBottom: '1rem', lineHeight: 1.4,
-    }}>{children}</h3>
-  ),
-  h4: ({ children }: { children: React.ReactNode }) => (
-    <h4 style={{
-      fontSize: '1rem', fontWeight: 700, color: '#d29922',
-      marginTop: '2rem', marginBottom: '0.8rem',
-    }}>{children}</h4>
-  ),
-  p: ({ children }: { children: React.ReactNode }) => (
-    <p style={{
-      color: '#c9d1d9', fontSize: '15px', lineHeight: '1.9',
-      marginBottom: '1.5rem',
-    }}>{children}</p>
-  ),
-  ul: ({ children }: { children: React.ReactNode }) => (
-    <ul style={{ paddingLeft: '1.75rem', marginBottom: '2rem', marginTop: '0.5rem', listStyleType: 'disc' }}>{children}</ul>
-  ),
-  ol: ({ children }: { children: React.ReactNode }) => (
-    <ol style={{ paddingLeft: '1.75rem', marginBottom: '2rem', marginTop: '0.5rem', listStyleType: 'decimal' }}>{children}</ol>
-  ),
-  li: ({ children }: { children: React.ReactNode }) => (
-    <li style={{ color: '#c9d1d9', fontSize: '15px', lineHeight: '1.9', marginBottom: '0.75rem' }}>{children}</li>
-  ),
-  strong: ({ children }: { children: React.ReactNode }) => (
-    <strong style={{ color: '#e6edf3', fontWeight: 700 }}>{children}</strong>
-  ),
-  em: ({ children }: { children: React.ReactNode }) => (
-    <em style={{ color: '#c9d1d9', fontStyle: 'italic' }}>{children}</em>
-  ),
-  a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer"
-      style={{ color: '#58a6ff', textDecoration: 'none' }}
-      onMouseOver={e => (e.currentTarget.style.textDecoration = 'underline')}
-      onMouseOut={e => (e.currentTarget.style.textDecoration = 'none')}>
+// ─── Code block renderer (used inside prose) ─────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const CodeBlock = ({ inline, className, children, ...props }: any) => {
+  const match = /language-(\w+)/.exec(className || '');
+  return !inline && match ? (
+    <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div"
+      customStyle={{ borderRadius: '10px', marginTop: '0.5rem', marginBottom: '1.5rem', fontSize: '13px', border: '1px solid rgba(255,255,255,0.08)', background: '#0A0A12' }}
+      {...props}>
+      {String(children).replace(/\n$/, '')}
+    </SyntaxHighlighter>
+  ) : (
+    <code className="text-[#FF6B35] bg-white/5 rounded px-1.5 py-0.5 text-sm" {...props}>
       {children}
-    </a>
-  ),
-  img: ({ src, alt }: { src?: string; alt?: string }) => (
-    <div style={{ display: 'flex', justifyContent: 'center', margin: '1.5rem 0 2rem' }}>
-      <img src={src} alt={alt || ''} style={{
-        maxWidth: '680px', width: '100%', borderRadius: '12px',
-        border: '1px solid #30363d', boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-      }} />
-    </div>
-  ),
-  code: ({ inline, className, children, ...props }: { inline?: boolean; className?: string; children?: React.ReactNode }) => {
-    const match = /language-(\w+)/.exec(className || '');
-    return !inline && match ? (
-      <SyntaxHighlighter style={vscDarkPlus} language={match[1]} PreTag="div"
-        customStyle={{ borderRadius: '8px', marginBottom: '1.5rem', fontSize: '13px', border: '1px solid #30363d', background: '#0d1117' }}
-        {...props}>
-        {String(children).replace(/\n$/, '')}
-      </SyntaxHighlighter>
-    ) : (
-      <code style={{ backgroundColor: 'rgba(110,118,129,0.2)', color: '#ff7b72', borderRadius: '4px', padding: '2px 7px', fontSize: '13px', fontFamily: 'ui-monospace, monospace', border: '1px solid rgba(110,118,129,0.25)' }} {...props}>
-        {children}
-      </code>
-    );
-  },
-  blockquote: ({ children }: { children: React.ReactNode }) => (
-    <blockquote style={{ borderLeft: '4px solid #3fb950', background: 'rgba(63,185,80,0.05)', padding: '0.8rem 1.5rem', borderRadius: '0 8px 8px 0', marginBottom: '2rem', marginTop: '0.5rem', color: '#8b949e', fontStyle: 'italic' }}>
-      {children}
-    </blockquote>
-  ),
-  hr: () => <hr style={{ border: 'none', borderTop: '1px solid #30363d', margin: '3rem 0' }} />,
-  table: ({ children }: { children: React.ReactNode }) => (
-    <div style={{ overflowX: 'auto', marginBottom: '2.5rem', marginTop: '0.75rem', borderRadius: '8px', border: '1px solid #30363d' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>{children}</table>
-    </div>
-  ),
-  thead: ({ children }: { children: React.ReactNode }) => (
-    <thead style={{ background: '#161b22', borderBottom: '1px solid #30363d' }}>{children}</thead>
-  ),
-  tbody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
-  tr: ({ children }: { children: React.ReactNode }) => (
-    <tr style={{ borderBottom: '1px solid #21262d' }}>{children}</tr>
-  ),
-  th: ({ children }: { children: React.ReactNode }) => (
-    <th style={{ padding: '12px 18px', textAlign: 'left', color: '#8b949e', fontWeight: 600, fontSize: '13px' }}>{children}</th>
-  ),
-  td: ({ children }: { children: React.ReactNode }) => (
-    <td style={{ padding: '12px 18px', color: '#c9d1d9', borderRight: '1px solid #21262d', verticalAlign: 'top', lineHeight: '1.7' }}>{children}</td>
-  ),
-});
+    </code>
+  );
+};
 
 // ─── GitHub-like Repo Header ──────────────────────────────────────────────────
-function RepoHeader({ repoContext, metadata }: { repoContext: any; metadata: any }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function RepoHeader({ repoContext }: { repoContext: any }) {
   const owner = repoContext?.owner || 'owner';
   const name = repoContext?.name || 'repository';
-  const stars = metadata?.stars ?? 0;
-  const forks = metadata?.forks ?? 0;
-  const issues = metadata?.openIssues ?? 0;
+  const stars = repoContext?.metadata?.stars ?? 0;
+  const forks = repoContext?.metadata?.forks ?? 0;
+  const issues = repoContext?.metadata?.openIssues ?? 0;
   const avatarUrl = `https://github.com/${owner}.png?size=64`;
-  const repoUrl = `https://github.com/${owner}/${name}`;
 
   return (
-    <div style={{
-      background: '#161b22', borderBottom: '1px solid #30363d',
-      padding: '20px 24px', display: 'flex', alignItems: 'center',
-      justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
-    }}>
-      {/* Left: avatar + repo path */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img src={avatarUrl} alt={owner} onError={e => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${owner}&background=0d1117&color=58a6ff`; }}
-          style={{ width: 40, height: 40, borderRadius: '50%', border: '2px solid #30363d' }} />
+    <div className="flex items-center justify-between flex-wrap gap-3 px-6 py-4"
+      style={{ background: 'rgba(255,107,53,0.06)', borderBottom: '1px solid rgba(255,107,53,0.15)' }}>
+      {/* Left: avatar + path */}
+      <div className="flex items-center gap-3">
+        <img src={avatarUrl} alt={owner}
+          onError={e => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${owner}&background=1a1a2e&color=FF6B35`; }}
+          className="w-10 h-10 rounded-full" style={{ border: '2px solid rgba(255,107,53,0.4)' }} />
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '18px', fontWeight: 700 }}>
-            <a href={`https://github.com/${owner}`} target="_blank" rel="noopener noreferrer"
-              style={{ color: '#58a6ff', textDecoration: 'none' }}>{owner}</a>
-            <span style={{ color: '#484f58' }}>/</span>
-            <a href={repoUrl} target="_blank" rel="noopener noreferrer"
-              style={{ color: '#e6edf3', textDecoration: 'none' }}>{name}</a>
+          <div className="flex items-center gap-1 text-base font-bold">
+            <span style={{ color: '#FF6B35' }}>{owner}</span>
+            <span className="text-white/30">/</span>
+            <span className="text-white">{name}</span>
           </div>
-          <div style={{ fontSize: '12px', color: '#8b949e', marginTop: '2px' }}>Auto-generated documentation</div>
+          <div className="text-xs text-white/40 mt-0.5">Auto-generated by CodeNova AI</div>
         </div>
       </div>
       {/* Right: stats */}
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div className="flex gap-2 flex-wrap">
         {[
-          { icon: <Star size={13} />, label: 'Stars', value: stars.toLocaleString(), color: '#d29922' },
-          { icon: <GitFork size={13} />, label: 'Forks', value: forks.toLocaleString(), color: '#3fb950' },
-          { icon: <AlertCircle size={13} />, label: 'Issues', value: issues.toLocaleString(), color: '#ff7b72' },
-        ].map(({ icon, label, value, color }) => (
-          <div key={label} style={{
-            display: 'flex', alignItems: 'center', gap: '5px',
-            background: '#21262d', border: '1px solid #30363d',
-            borderRadius: '6px', padding: '5px 10px', fontSize: '12px', color: '#c9d1d9',
-          }}>
+          { icon: <Star size={12} />, value: stars.toLocaleString(), label: 'Stars', color: '#FFE600' },
+          { icon: <GitFork size={12} />, value: forks.toLocaleString(), label: 'Forks', color: '#00FF87' },
+          { icon: <AlertCircle size={12} />, value: issues.toLocaleString(), label: 'Issues', color: '#FF6B35' },
+        ].map(({ icon, value, label, color }) => (
+          <div key={label} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#c9d1d9' }}>
             <span style={{ color }}>{icon}</span>
-            <span style={{ fontWeight: 600 }}>{value}</span>
-            <span style={{ color: '#8b949e' }}>{label}</span>
+            <span className="font-semibold">{value}</span>
+            <span className="text-white/40">{label}</span>
           </div>
         ))}
       </div>
@@ -183,9 +88,6 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
   const [copied, setCopied] = useState(false);
-
-  // Memoised components object (stable reference = no re-render flicker)
-  const markdownComponents = makeMarkdownComponents();
 
   const handleGenerate = async () => {
     setIsLoading(true);
@@ -222,10 +124,10 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
 
   return (
     <div className="flex flex-col h-full">
-      {/* ── Top Header Bar ──────────────────────────────────────────────── */}
+      {/* ── Top Header ──────────────────────────────────────────────────────── */}
       <div className="px-6 py-4 border-b border-white/[0.06] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FF6B35] to-orange-600 flex items-center justify-center">
             <FileText className="w-4 h-4 text-white" />
           </div>
           <div>
@@ -236,11 +138,10 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
 
         {readme && (
           <div className="flex items-center gap-2">
-            {/* Preview / Raw toggle */}
             <div className="flex items-center bg-white/[0.04] rounded-lg p-1 border border-white/10">
               {(['preview', 'raw'] as ViewMode[]).map(mode => (
                 <button key={mode} onClick={() => setViewMode(mode)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === mode ? 'bg-violet-600 text-white' : 'text-white/50 hover:text-white'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === mode ? 'bg-[#FF6B35] text-white' : 'text-white/50 hover:text-white'}`}>
                   {mode === 'preview' ? <Eye className="w-3 h-3" /> : <Code className="w-3 h-3" />}
                   {mode === 'preview' ? 'Preview' : 'Raw'}
                 </button>
@@ -252,14 +153,14 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
               {copied ? 'Copied' : 'Copy'}
             </button>
             <button onClick={handleDownload}
-              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white border border-white/10 hover:border-green-500/40 hover:text-green-400 rounded-lg px-3 py-1.5 transition-all">
+              className="flex items-center gap-1.5 text-xs text-white/60 hover:text-white border border-white/10 hover:border-[#FF6B35]/40 hover:text-[#FF6B35] rounded-lg px-3 py-1.5 transition-all">
               <Download className="w-3 h-3" /> .md
             </button>
           </div>
         )}
       </div>
 
-      {/* ── Body ─────────────────────────────────────────────────────────── */}
+      {/* ── Body ─────────────────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">
 
@@ -267,37 +168,43 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
           {!readme && !isLoading && (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center h-full gap-6 p-8">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/20 border border-green-500/20 flex items-center justify-center">
-                <FileText className="w-10 h-10 text-green-400" />
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                style={{ background: 'rgba(255,107,53,0.1)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                <FileText className="w-10 h-10" style={{ color: '#FF6B35' }} />
               </div>
               <div className="text-center max-w-sm">
                 <h3 className="text-white font-semibold text-lg mb-2">Generate Professional README</h3>
                 <p className="text-white/40 text-sm leading-relaxed">
-                  AI analyzes your codebase and creates a beautifully rendered document — exactly like a real GitHub repository page.
+                  AI will analyze your codebase and create a professional README — rendered exactly like a real GitHub repository page.
                 </p>
               </div>
               <div className="glass rounded-xl p-5 max-w-md w-full">
                 <p className="text-xs text-white/40 mb-3 uppercase tracking-wider font-mono">Will include:</p>
                 <div className="grid grid-cols-2 gap-2">
-                  {['Repo Header & Logo', 'Stars / Forks / Issues', 'Overview & Features', 'Architecture Table', 'Tech Stack Table', 'Project Structure', 'Setup Instructions', 'Author Details'].map(item => (
+                  {['Repo Header & Avatar', 'Stars / Forks / Issues', 'Overview & Features', 'Architecture Table', 'Tech Stack Table', 'Project Structure', 'Setup Instructions', 'Author Details'].map(item => (
                     <div key={item} className="flex items-center gap-2 text-xs text-white/60">
-                      <Check className="w-3 h-3 text-green-400 flex-shrink-0" />{item}
+                      <Check className="w-3 h-3 flex-shrink-0" style={{ color: '#FF6B35' }} />{item}
                     </div>
                   ))}
                 </div>
               </div>
               <button onClick={handleGenerate}
-                className="px-8 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center gap-2">
+                className="px-8 py-3 rounded-xl text-white font-semibold transition-all flex items-center gap-2 hover:shadow-lg"
+                style={{ background: 'linear-gradient(135deg, #FF6B35, #FF8C42)', boxShadow: '0 0 0 rgba(255,107,53,0)' }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 30px rgba(255,107,53,0.4)'; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 0 0 rgba(255,107,53,0)'; }}>
                 <FileText className="w-4 h-4" /> Generate README
               </button>
             </motion.div>
           )}
 
-          {/* Loading skeletons */}
+          {/* Loading */}
           {isLoading && (
             <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-8 space-y-4">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 border-2 border-green-500/40 border-t-green-400 rounded-full animate-spin" />
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                  className="w-10 h-10 rounded-full"
+                  style={{ border: '2px solid rgba(255,107,53,0.15)', borderTopColor: '#FF6B35' }} />
                 <span className="text-white/60 text-sm">Generating README from codebase…</span>
               </div>
               {Array.from({ length: 14 }).map((_, i) => (
@@ -306,59 +213,73 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
             </motion.div>
           )}
 
-          {/* Generated README */}
+          {/* README rendered — EXACT same pattern as ExplainPanel */}
           {readme && !isLoading && (
-            <motion.div key="readme" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="p-4 md:p-6">
-              {viewMode === 'raw' ? (
-                /* ── RAW ── */
-                <div className="rounded-xl overflow-hidden border border-white/10 shadow-2xl"
-                  style={{ background: 'rgba(13,17,23,0.9)', backdropFilter: 'blur(20px)' }}>
-                  <SyntaxHighlighter language="markdown" style={vscDarkPlus}
-                    customStyle={{ margin: 0, padding: '2rem', background: 'transparent', fontSize: '12.5px', lineHeight: '1.75' }}>
-                    {readme}
-                  </SyntaxHighlighter>
-                </div>
-              ) : (
-                /* ── PREVIEW — GitHub dark theme card ── */
-                <div style={{
-                  background: '#0d1117', border: '1px solid #30363d',
-                  borderRadius: '14px', overflow: 'hidden',
-                  boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
-                  maxWidth: '900px', margin: '0 auto',
-                }}>
-                  {/* GitHub-style Repo Header with avatar + stats */}
-                  <RepoHeader repoContext={repoContext} metadata={repoContext?.metadata} />
+            <div className="h-full overflow-y-auto px-6 py-6">
+              <motion.div key="readme" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+                className="max-w-4xl mx-auto">
 
-                  {/* OpenGraph preview banner from GitHub */}
-                  <div style={{ width: '100%', height: '220px', overflow: 'hidden', position: 'relative', background: '#161b22' }}>
-                    <img
-                      src={`https://opengraph.githubassets.com/1/${repoContext?.owner}/${repoContext?.name}`}
-                      alt="Repo Banner"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.85 }}
-                    />
-                    <div style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to bottom, transparent 40%, #0d1117 100%)',
-                    }} />
-                  </div>
-
-                  {/* README Markdown body */}
-                  <div style={{ padding: '2.5rem 3rem 4rem' }}>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                {viewMode === 'raw' ? (
+                  /* ── RAW ── */
+                  <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(20,20,30,0.6)', border: '1px solid rgba(255,107,53,0.2)' }}>
+                    <SyntaxHighlighter language="markdown" style={vscDarkPlus}
+                      customStyle={{ margin: 0, padding: '2rem', background: 'transparent', fontSize: '12.5px', lineHeight: '1.75' }}>
                       {readme}
-                    </ReactMarkdown>
+                    </SyntaxHighlighter>
                   </div>
+                ) : (
+                  /* ── PREVIEW — exact same card style as ExplainPanel ── */
+                  <div className="rounded-2xl overflow-hidden"
+                    style={{ background: 'rgba(20,20,30,0.4)', border: '1px solid rgba(255,107,53,0.2)', transformStyle: 'preserve-3d' }}>
 
-                  {/* Footer */}
-                  <div style={{ borderTop: '1px solid #21262d', padding: '14px 24px', background: '#161b22', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: '#8b949e' }}>
-                    <span>Auto-generated by <span style={{ color: '#58a6ff' }}>CodeNova AI</span></span>
-                    <span>github.com/{repoContext?.owner}/{repoContext?.name}</span>
+                    {/* Repo-specific banner */}
+                    <div className="w-full h-48 relative overflow-hidden bg-[#0A0A12]">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#14141E] to-transparent z-10" />
+                      <img
+                        src={`https://opengraph.githubassets.com/1/${repoContext?.owner}/${repoContext?.name}`}
+                        alt="Repo Banner"
+                        className="w-full h-full object-cover opacity-70"
+                      />
+                      <div className="absolute bottom-4 left-6 z-20">
+                        <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md inline-block"
+                          style={{ background: 'rgba(255,107,53,0.2)', border: '1px solid rgba(255,107,53,0.4)', color: '#FF6B35' }}>
+                          Auto-Generated Documentation
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Repo header with avatar + stats */}
+                    <RepoHeader repoContext={repoContext} />
+
+                    {/* ── Markdown body — IDENTICAL prose classes to ExplainPanel ── */}
+                    <div className="p-8 prose prose-invert max-w-none
+                        prose-headings:font-bold
+                        prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-2 prose-h1:border-b prose-h1:border-white/10 prose-h1:pb-4 prose-h1:text-[#FF6B35]
+                        prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-5 prose-h2:text-[#00F5FF]
+                        prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-4 prose-h3:text-[#00FF87]
+                        prose-h4:text-base prose-h4:mt-6 prose-h4:mb-3 prose-h4:text-[#FFE600]
+                        prose-p:text-white/80 prose-p:leading-relaxed prose-p:text-[15px] prose-p:mb-4
+                        prose-li:text-white/80 prose-li:text-[15px] prose-li:mb-2
+                        prose-ul:mb-6 prose-ul:mt-2
+                        prose-ol:mb-6 prose-ol:mt-2
+                        prose-strong:text-white
+                        prose-blockquote:border-l-[#FF6B35] prose-blockquote:text-white/60
+                        prose-code:text-[#FF6B35] prose-code:bg-white/5 prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
+                        prose-table:border-collapse prose-table:w-full
+                        prose-th:text-white/60 prose-th:font-semibold prose-th:text-sm prose-th:py-3 prose-th:px-4 prose-th:border prose-th:border-white/10
+                        prose-td:py-3 prose-td:px-4 prose-td:border prose-td:border-white/10 prose-td:text-white/75 prose-td:text-sm
+                        prose-hr:border-white/10 prose-hr:my-8">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{ code: CodeBlock }}
+                      >
+                        {readme}
+                      </ReactMarkdown>
+                    </div>
                   </div>
-                </div>
-              )}
-            </motion.div>
+                )}
+              </motion.div>
+            </div>
           )}
 
         </AnimatePresence>
