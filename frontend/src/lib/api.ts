@@ -57,9 +57,9 @@ export async function chatWithRepo(sessionId: string, question: string, repoKey:
   } catch (err) { return getError(err); }
 }
 
-export async function debugError(sessionId: string, errorMessage: string, repoKey: string) {
+export async function debugError(sessionId: string, errorMessage: string, repoKey: string, image?: string) {
   try {
-    const { data } = await api.post('/api/ai/debug', { sessionId, errorMessage, repoKey });
+    const { data } = await api.post('/api/ai/debug', { sessionId, errorMessage, repoKey, image });
     return data;
   } catch (err) { return getError(err); }
 }

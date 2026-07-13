@@ -86,9 +86,8 @@ class AIService {
     try {
       return await this.embeddings.embedQuery(text.replace(/\n/g, ' '));
     } catch (err) { 
-      console.warn('[AIService] OpenAI Embedding failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return new Array(1536).fill(0).map(() => Math.random() - 0.5); 
+      console.warn('[AIService] OpenAI Embedding failed:', err.message);
+      throw err;
     }
   }
 
@@ -98,9 +97,8 @@ class AIService {
     try {
       return await this.embeddings.embedDocuments(texts.map(t => t.replace(/\n/g, ' ')));
     } catch (err) { 
-      console.warn('[AIService] OpenAI Batch Embedding failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return texts.map(() => new Array(1536).fill(0).map(() => Math.random() - 0.5)); 
+      console.warn('[AIService] OpenAI Batch Embedding failed:', err.message);
+      throw err;
     }
   }
 
@@ -135,9 +133,8 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return res.content;
     } catch (err) {
-      console.warn('[AIService] explainProject failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.explain(repoContext);
+      console.warn('[AIService] explainProject failed:', err.message);
+      throw err;
     }
   }
 
@@ -154,9 +151,8 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return res.content;
     } catch (err) {
-      console.warn('[AIService] chatWithRepo failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.chat(question);
+      console.warn('[AIService] chatWithRepo failed:', err.message);
+      throw err;
     }
   }
 
@@ -180,9 +176,8 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return res.content;
     } catch (err) {
-      console.warn('[AIService] analyzeImage failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.debug("Image Analysis failed");
+      console.warn('[AIService] analyzeImage failed:', err.message);
+      throw err;
     }
   }
 
@@ -199,9 +194,33 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return res.content;
     } catch (err) {
-      console.warn('[AIService] debugError failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.debug(errorMessage);
+      console.warn('[AIService] debugError failed:', err.message);
+      throw err;
+    }
+  }
+  
+  async debugImageError(errorMessage, base64Image, contextChunks) {
+    if (this.demoMode) {
+      await new Promise(r => setTimeout(r, 1000));
+      return DEMO.debug("Image debug fallback");
+    }
+    try {
+      const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
+      const textPrompt = `I have encountered an error. Here is the error description/message:\n${errorMessage}\n\nAnalyze this error message along with the provided screenshot of the error and the following codebase context to provide a root cause and fix.\n\nCode Context:\n${context}\n\nProvide: 1) Error type 2) Root cause 3) Specific fix with code 4) Files to check`;
+      
+      const res = await this.chatModel.invoke([
+        new SystemMessage('You are an expert debugger. You have perfect vision capabilities to read error traces from screenshots and can cross-reference them with the codebase context.'),
+        new HumanMessage({
+          content: [
+            { type: "text", text: textPrompt },
+            { type: "image_url", image_url: { url: base64Image } }
+          ]
+        })
+      ]);
+      return res.content;
+    } catch (err) {
+      console.warn('[AIService] debugImageError failed:', err.message);
+      throw err;
     }
   }
 
@@ -217,9 +236,8 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return res.content;
     } catch (err) {
-      console.warn('[AIService] generateReadme failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.readme(repoContext);
+      console.warn('[AIService] generateReadme failed:', err.message);
+      throw err;
     }
   }
 
@@ -235,9 +253,8 @@ Use markdown formatting. Be specific and insightful.`;
       ]);
       return JSON.parse(res.content);
     } catch (err) {
-      console.warn('[AIService] suggestImprovements failed, falling back to mock:', err.message);
-      this.demoMode = true;
-      return DEMO.improve();
+      console.warn('[AIService] suggestImprovements failed:', err.message);
+      throw err;
     }
   }
 

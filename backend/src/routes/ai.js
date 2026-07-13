@@ -150,7 +150,7 @@ router.post('/chat', async (req, res, next) => {
  */
 router.post('/debug', async (req, res, next) => {
   try {
-    const { sessionId, errorMessage, repoKey } = req.body;
+    const { sessionId, errorMessage, repoKey, image } = req.body;
 
     if (!errorMessage || typeof errorMessage !== 'string') {
       return res.status(400).json({ error: 'errorMessage is required.' });
@@ -164,8 +164,13 @@ router.post('/debug', async (req, res, next) => {
     // Search for code chunks relevant to the error
     const contextChunks = await ragService.search(errorMessage, repoKey, 6);
 
-    // Perform root cause analysis
-    const analysis = await aiService.debugError(errorMessage, contextChunks);
+    // Perform root cause analysis (with or without image)
+    let analysis;
+    if (image) {
+      analysis = await aiService.debugImageError(errorMessage, image, contextChunks);
+    } else {
+      analysis = await aiService.debugError(errorMessage, contextChunks);
+    }
 
     console.log(`[/debug] Analysis complete (${analysis.length} chars)`);
     return res.status(200).json({ analysis });

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bug, Copy, Check, AlertCircle, Lightbulb, FileCode } from 'lucide-react';
+import { Bug, Copy, Check, AlertCircle, Lightbulb, FileCode, ImagePlus, X } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { debugError } from '@/lib/api';
@@ -56,17 +56,38 @@ function CopyButton({ text }: { text: string }) {
 
 export default function DebugPanel({ sessionId, repoKey, isEmbedded }: DebugPanelProps) {
   const [errorInput, setErrorInput] = useState('');
+  const [image, setImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image must be less than 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   const handleDebug = async () => {
-    if (!errorInput.trim()) { toast.error('Paste an error message first'); return; }
+    if (!errorInput.trim() && !image) { toast.error('Paste an error message or upload a screenshot first'); return; }
     // Allow debug even while embedding — works with whatever context is ready
     if (!isEmbedded) toast('⚡ Analyzing with available context...', { icon: '🐛', duration: 2000 });
+    
+    // We must provide some text if image is uploaded without text
+    const textToSend = errorInput.trim() || 'Please analyze this error screenshot.';
+    
     setIsLoading(true);
     setAnalysis('');
     try {
-      const result = await debugError(sessionId, errorInput, repoKey);
+      const currentImage = image;
+      const result = await debugError(sessionId, textToSend, repoKey, currentImage || undefined);
       setAnalysis(result.analysis);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Debug failed';
@@ -152,26 +173,54 @@ export default function DebugPanel({ sessionId, repoKey, isEmbedded }: DebugPane
               value={errorInput}
               onChange={(e) => setErrorInput(e.target.value)}
               placeholder={`Paste your error message here...\n\nExample:\nTypeError: Cannot read properties of undefined\n  at Component.jsx:42:18`}
-              className="flex-1 min-h-[280px] bg-black/40 border border-white/10 rounded-xl p-4 text-sm font-mono text-red-300/80 placeholder-white/20 outline-none resize-none focus:border-red-500/40 transition-colors"
+              className="flex-1 min-h-[200px] bg-black/40 border border-white/10 rounded-xl p-4 text-sm font-mono text-red-300/80 placeholder-white/20 outline-none resize-none focus:border-red-500/40 transition-colors"
             />
+            
+            {image && (
+              <div className="relative inline-block w-fit mt-2">
+                <img src={image} alt="Upload preview" className="h-24 w-auto rounded-lg border border-white/20 shadow-lg object-contain bg-black/40" />
+                <button
+                  onClick={() => setImage(null)}
+                  className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors shadow-lg"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
 
-            <button
-              onClick={handleDebug}
-              disabled={isLoading || !errorInput.trim()}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold text-sm disabled:opacity-40 hover:shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Analyzing…
-                </>
-              ) : (
-                <>
-                  <Bug className="w-4 h-4" />
-                  Analyze Error
-                </>
-              )}
-            </button>
+            <div className="flex gap-3 mt-2">
+              <label
+                title="Upload screenshot to debug"
+                className={`h-12 w-12 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all flex-shrink-0 cursor-pointer ${(!isEmbedded || isLoading) ? 'opacity-40 pointer-events-none' : ''}`}
+              >
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleImageUpload}
+                  disabled={!isEmbedded || isLoading}
+                />
+                <ImagePlus className="w-5 h-5" />
+              </label>
+
+              <button
+                onClick={handleDebug}
+                disabled={isLoading || (!errorInput.trim() && !image)}
+                className="flex-1 h-12 rounded-xl bg-gradient-to-r from-red-600 to-orange-600 text-white font-semibold text-sm disabled:opacity-40 hover:shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Analyzing…
+                  </>
+                ) : (
+                  <>
+                    <Bug className="w-4 h-4" />
+                    Analyze Error
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Right: Analysis output */}
