@@ -307,55 +307,63 @@ export default function ReadmePanel({ sessionId, repoContext }: ReadmePanelProps
           )}
 
           {readme && !isLoading && (
-            <motion.div
-              key="readme"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-8"
-            >
-              {viewMode === 'raw' ? (
-                // ── RAW view: pure markdown code ───────────────────────────
-                <div className="rounded-xl overflow-hidden border border-white/10 text-xs">
-                  <SyntaxHighlighter
-                    language="markdown"
-                    style={vscDarkPlus}
-                    customStyle={{ margin: 0, padding: '1.5rem', background: 'rgba(5,5,15,0.8)', fontSize: '12.5px', lineHeight: '1.7' }}
-                  >
-                    {readme}
-                  </SyntaxHighlighter>
-                </div>
-              ) : (
-                // ── PREVIEW view: beautifully rendered, GitHub-like ─────────
-                <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl"
-                     style={{ background: 'rgba(20,20,30,0.6)', border: '1px solid rgba(139,92,246,0.3)', backdropFilter: 'blur(20px)' }}>
-                  
-                  {/* Beautiful UI Banner Image matching AI Explain */}
-                  <div className="w-full h-48 relative overflow-hidden bg-[#0A0A12]">
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#14141E] to-transparent z-10" />
-                    <img 
-                      src="https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=2088&auto=format&fit=crop" 
-                      alt="README Header Banner" 
-                      className="w-full h-full object-cover opacity-70"
-                    />
-                    <div className="absolute bottom-4 left-6 z-20">
-                      <div className="px-3 py-1 bg-violet-500/20 border border-violet-400/40 text-violet-300 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md inline-block">
-                        Auto-Generated Documentation
-                      </div>
-                    </div>
-                  </div>
+            <div className="h-full overflow-y-auto px-6 py-6">
+              <motion.div
+                key="readme"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="max-w-4xl mx-auto"
+              >
+                <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                  <FileText className="w-6 h-6 text-violet-400" />
+                  AI Documentation
+                </h2>
 
-                  {/* Markdown Content */}
-                  <div className="p-8 md:p-12">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={markdownComponents}
+                {viewMode === 'raw' ? (
+                  // ── RAW view: pure markdown code ───────────────────────────
+                  <div className="rounded-2xl overflow-hidden border border-white/10 text-xs shadow-2xl"
+                       style={{ background: 'rgba(20,20,30,0.6)', backdropFilter: 'blur(20px)' }}>
+                    <SyntaxHighlighter
+                      language="markdown"
+                      style={vscDarkPlus}
+                      customStyle={{ margin: 0, padding: '2rem', background: 'transparent', fontSize: '12.5px', lineHeight: '1.7' }}
                     >
                       {readme}
-                    </ReactMarkdown>
+                    </SyntaxHighlighter>
                   </div>
-                </div>
-              )}
-            </motion.div>
+                ) : (
+                  // ── PREVIEW view: beautifully rendered, GitHub-like ─────────
+                  <div className="rounded-2xl overflow-hidden shadow-2xl"
+                       style={{ background: 'rgba(20,20,30,0.4)', border: '1px solid rgba(139,92,246,0.2)', backdropFilter: 'blur(20px)', transformStyle: 'preserve-3d' }}>
+                    
+                    {/* Beautiful UI Banner Image matching the Repo */}
+                    <div className="w-full h-48 relative overflow-hidden bg-[#0A0A12]">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#14141E] to-transparent z-10" />
+                      <img 
+                        src={`https://opengraph.githubassets.com/1/${repoContext?.owner}/${repoContext?.name}`} 
+                        alt="Repository Banner" 
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                      <div className="absolute bottom-4 left-6 z-20">
+                        <div className="px-3 py-1 bg-violet-500/20 border border-violet-400/40 text-violet-300 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md inline-block">
+                          Auto-Generated Documentation
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Markdown Content */}
+                    <div className="p-8 md:p-12">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={markdownComponents}
+                      >
+                        {readme}
+                      </ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </div>
           )}
         </AnimatePresence>
       </div>
