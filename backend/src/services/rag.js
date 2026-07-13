@@ -102,7 +102,7 @@ class RAGService {
     // ── Step 2: Filter to text files only ──────────────────────────────────
     const textFiles = fileTree
       .filter((file) => this.isTextFile(file.path))
-      .slice(0, 40); // Cap at 40 files for fast embedding (was 150)
+      .slice(0, 15); // Cap at 15 files for fast embedding (was 40)
 
     console.log(`[RAGService] ${textFiles.length} text files to process.`);
 

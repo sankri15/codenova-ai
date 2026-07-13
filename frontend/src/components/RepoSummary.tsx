@@ -71,10 +71,10 @@ export default function RepoSummary({ repoData }: RepoSummaryProps) {
       <div className="glass rounded-2xl border border-white/08 p-4">
         {/* Header */}
         <div className="flex items-start gap-3 mb-4">
-          {repo.owner?.avatar_url ? (
+          {repo.metadata?.owner?.avatar_url || repo.owner?.avatar_url ? (
             <img
-              src={repo.owner.avatar_url}
-              alt={repo.owner.login}
+              src={repo.metadata?.owner?.avatar_url || repo.owner?.avatar_url || ''}
+              alt={repo.owner}
               className="w-10 h-10 rounded-full border-2 border-violet-500/30"
             />
           ) : (
@@ -84,37 +84,37 @@ export default function RepoSummary({ repoData }: RepoSummaryProps) {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-bold text-white text-sm truncate">{repo.name || 'Repository'}</h3>
+              <h3 className="font-bold text-white text-sm truncate">{repo.metadata?.name || repo.repo || 'Repository'}</h3>
               <span
                 className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                  repo.private
+                  repo.metadata?.visibility === 'private'
                     ? 'bg-orange-500/15 text-orange-400 border border-orange-500/25'
                     : 'bg-green-500/15 text-green-400 border border-green-500/25'
                 }`}
               >
-                {repo.private ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
-                {repo.private ? 'Private' : 'Public'}
+                {repo.metadata?.visibility === 'private' ? <Lock className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                {repo.metadata?.visibility === 'private' ? 'Private' : 'Public'}
               </span>
             </div>
-            {repo.owner?.login && (
-              <p className="text-[#64748B] text-xs mt-0.5">by {repo.owner.login}</p>
+            {repo.owner && (
+              <p className="text-[#64748B] text-xs mt-0.5">by {repo.owner}</p>
             )}
           </div>
         </div>
 
         {/* Description */}
-        {repo.description && (
+        {repo.metadata?.description && (
           <p className="text-[#94A3B8] text-xs leading-relaxed mb-4 truncate-3">
-            {repo.description}
+            {repo.metadata.description}
           </p>
         )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          <StatCard icon={<Star className="w-3.5 h-3.5" />} label="Stars" value={repo.stargazers_count ?? 0} />
-          <StatCard icon={<GitFork className="w-3.5 h-3.5" />} label="Forks" value={repo.forks_count ?? 0} />
-          <StatCard icon={<AlertCircle className="w-3.5 h-3.5" />} label="Issues" value={repo.open_issues_count ?? 0} />
-          <StatCard icon={<Eye className="w-3.5 h-3.5" />} label="Size" value={formatBytes(repo.size)} />
+          <StatCard icon={<Star className="w-3.5 h-3.5" />} label="Stars" value={repo.metadata?.stars ?? 0} />
+          <StatCard icon={<GitFork className="w-3.5 h-3.5" />} label="Forks" value={repo.metadata?.forks ?? 0} />
+          <StatCard icon={<AlertCircle className="w-3.5 h-3.5" />} label="Issues" value={repo.metadata?.openIssues ?? 0} />
+          <StatCard icon={<Eye className="w-3.5 h-3.5" />} label="Size" value={formatBytes(repo.metadata?.size ?? 0)} />
         </div>
 
         {/* Language bar */}
@@ -180,22 +180,22 @@ export default function RepoSummary({ repoData }: RepoSummaryProps) {
 
         {/* Meta info */}
         <div className="space-y-2 pt-3 border-t border-white/06">
-          {repo.license?.name && (
+          {repo.metadata?.license && (
             <div className="flex items-center gap-2 text-xs text-[#64748B]">
               <Scale className="w-3.5 h-3.5 text-[#64748B] flex-shrink-0" />
-              <span>{repo.license.name}</span>
+              <span>{repo.metadata.license}</span>
             </div>
           )}
-          {repo.updated_at && (
+          {repo.metadata?.updatedAt && (
             <div className="flex items-center gap-2 text-xs text-[#64748B]">
               <Calendar className="w-3.5 h-3.5 text-[#64748B] flex-shrink-0" />
-              <span>Updated {formatDate(repo.updated_at)}</span>
+              <span>Updated {formatDate(repo.metadata.updatedAt)}</span>
             </div>
           )}
-          {repo.default_branch && (
+          {repo.metadata?.defaultBranch && (
             <div className="flex items-center gap-2 text-xs text-[#64748B]">
               <span className="text-[#64748B]">⎇</span>
-              <span>{repo.default_branch}</span>
+              <span>{repo.metadata.defaultBranch}</span>
             </div>
           )}
         </div>
