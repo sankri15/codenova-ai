@@ -192,51 +192,98 @@ Write an extremely detailed explanation (at least 500 words) with these sections
   // ── Generate README ────────────────────────────────────────────────────────
   async generateReadme(repoContext) {
     try {
+      // Build real file list from actual repo data
+      const files = Array.isArray(repoContext.fileTree)
+        ? repoContext.fileTree.slice(0, 40).map(f => f.path || f).join('\n')
+        : 'Not available';
+
+      const langs = repoContext.languages
+        ? Object.entries(repoContext.languages).map(([l, b]) => `${l}: ${Math.round(Number(b)/1000)}KB`).join(', ')
+        : '';
+
       const response = await this._generate(
-        'You are an expert technical writer. Create a professional, extremely structured README.md. You MUST NOT wrap your response in ```markdown or ``` tags. Output ONLY the raw markdown text itself so it renders natively. Do NOT say "Here is your README".',
-        `Generate a complete, production-ready README.md for this repository:
+        'You are an expert technical writer for GitHub. Output ONLY raw markdown. NO ```markdown fences. NO preamble. NO "Here is your README". Start directly with the # heading.',
+        `Generate a professional README.md for this SPECIFIC repository.
+Use ONLY real information from the data below — do not invent features.
+
+REPO DATA:
 Name: ${repoContext.name}
 Owner: ${repoContext.owner}
-Description: ${repoContext.description}
+Description: ${repoContext.description || 'No description'}
+Stars: ${repoContext.metadata?.stars ?? 0}
+Language: ${repoContext.metadata?.language || ''}
+Languages: ${langs}
 Tech Stack: ${(repoContext.techStack || []).join(', ')}
+Actual Files:
+${files}
 
-You MUST strictly follow this exact template structure and use these exact emojis for the headers. 
-CRITICAL RULE: DO NOT WRITE LONG PARAGRAPHS. You MUST present all information using structured bullet points or Markdown tables. Make it extremely structured and highly attractive to read.
+OUTPUT THIS EXACT STRUCTURE — no deviations:
 
 # ${repoContext.name}
-A brief highly professional one-line description.
+
+> One-line professional tagline specific to this repo.
 
 ## 🚀 Overview
-[Use 3-5 highly detailed bullet points to explain what the project does]
 
-## 🖼️ How It Works
-[Use a structured step-by-step numbered list or bullet points explaining the core mechanics]
-
-## 🌍 Architecture
-[Use a Markdown Table explaining Frontend, Backend, and Deployment architecture]
+- [bullet: what the project does — specific to this repo]
+- [bullet: who it is for]
+- [bullet: key value proposition]
+- [bullet: what makes it unique]
 
 ## ✨ Features
-[Exhaustive bulleted list of every single feature with emojis]
+
+- 🔹 **[Feature Name]:** [one-line description] — repeat for every real feature
+- 🔹 **[Feature Name]:** [one-line description]
 
 ## 🛠️ Tech Stack
-[Use a Markdown Table for categorized tech stack (e.g. Category | Technology | Purpose)]
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| [fill from real tech stack above] | ... | ... |
 
 ## 📁 Project Structure
-[Present the project structure ONLY as a detailed Markdown Table (Columns: File/Folder, Type, Description). Do NOT use ASCII trees.]
+
+CRITICAL: You MUST render this section as a Markdown table. NEVER use ASCII trees (├──, └──, │).
+Use ONLY the actual files listed above.
+
+| File / Folder | Type | Description |
+| :--- | :--- | :--- |
+| [real file or folder from file list] | File/Directory | [what it does] |
+
+## 🌍 Architecture
+
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| [fill based on actual tech stack] | ... | ... |
 
 ## 💻 Getting Started
-[Structured step-by-step numbered list for setup instructions]
 
-## 👨💻 Author
-[Bullet points for Author details]
+1. **Clone:** \`git clone https://github.com/${repoContext.owner}/${repoContext.name}.git\`
+2. **Install:** [real install command based on detected stack]
+3. **Configure:** [real config steps]
+4. **Run:** [real run command]
 
-REQUIREMENTS:
-1. Ensure the markdown is exceptionally clean and heavily relies on lists and tables.
-2. DO NOT wrap the overall document in \`\`\`markdown ... \`\`\`! Just write the raw text.`
+## 👨‍💻 Author
+
+- **Name:** ${repoContext.owner}
+- **GitHub:** [https://github.com/${repoContext.owner}](https://github.com/${repoContext.owner})
+
+---
+*Built with ❤️ — auto-documented by [CodeNova AI](https://codenova-ai-ivory.vercel.app)*
+
+HARD RULES:
+- NEVER use ASCII tree characters (├ └ │ ─)
+- Project Structure MUST be a markdown table
+- Every table must have header + separator rows
+- Use only bullet points or tables — zero prose paragraphs
+- Output raw markdown only, no code fences`
       );
-      
-      // Aggressive fallback to strip any markdown block the AI stubbornly includes
-      const stripped = response.replace(/^[\s\S]*?```(?:markdown|md)?\n/i, '').replace(/\n```[\s\S]*?$/i, '').trim();
+
+      // Strip any stray markdown fences the model may still add
+      const stripped = response
+        .replace(/^[\s\S]*?```(?:markdown|md)?\n/i, '')
+        .replace(/\n```[\s\S]*?$/i, '')
+        .trim();
       return stripped || response.trim();
     } catch (err) {
       console.warn('[AIService] generateReadme failed:', err.message);
