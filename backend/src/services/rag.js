@@ -11,7 +11,7 @@
 
 import aiService from './ai.js';
 import vectorStore from './vectorStore.js';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 
 // ─── Allowed Text File Extensions ────────────────────────────────────────────
 // Only process files with these extensions — binary files are excluded upstream
