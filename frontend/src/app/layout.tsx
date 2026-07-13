@@ -11,13 +11,18 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'CodeNova – AI GitHub Codebase Intelligence',
+  title: 'CodeNova',
   description:
     'CodeNova uses advanced AI to analyze, explain, and improve any GitHub repository in seconds. Chat with your codebase, debug errors, generate READMEs, and get actionable improvement suggestions.',
   keywords: ['AI', 'GitHub', 'codebase', 'analysis', 'developer tools', 'CodeNova', 'RAG', 'code review'],
   authors: [{ name: 'Sanjana Pal' }],
+  icons: {
+    icon: [
+      { url: '/icon.png' }
+    ]
+  },
   openGraph: {
-    title: 'CodeNova – AI GitHub Codebase Intelligence',
+    title: 'CodeNova',
     description: 'Understand any GitHub codebase in seconds — powered by CodeNova AI',
     type: 'website',
   },
