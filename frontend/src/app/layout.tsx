@@ -24,6 +24,8 @@ export const metadata: Metadata = {
   themeColor: '#05050F',
 }
 
+import CustomCursor from '@/components/CustomCursor'
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
@@ -35,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.variable} font-sans antialiased text-white`}
         style={{ background: '#05050F' }}>
+        <CustomCursor />
         {children}
         <Toaster
           position="top-right"
