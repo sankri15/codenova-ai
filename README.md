@@ -27,7 +27,7 @@ When you paste a GitHub URL into CodeNova AI, the system instantly analyzes the 
 
 <br />
 
-![CodeNova Dashboard Screenshot](cn.png)
+![CodeNova Dashboard Screenshot](codenova.png)
 
 <br />
 
