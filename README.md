@@ -63,9 +63,11 @@ Built with a modern, high-performance web stack:
 ### Backend
 - **Node.js** & **Express.js**
 - **MongoDB** (Session storage)
-- **Google Gemini API** (`gemini-flash-lite-latest` for blazing-fast intelligence and `gemini-embedding-2` for embeddings)
+- **Google Gemini API** (Utilizing the official `@google/genai` SDK with `gemini-flash-lite-latest` and `gemini-embedding-2` for blazing-fast intelligence)
+- **LangChain** (Architecting the custom Retrieval-Augmented Generation / RAG semantic search pipeline)
 - **GitHub REST API** (Octokit, heavily parallelized for sub-1-second load times)
-- **In-Memory Vector Store** (For fast RAG retrieval)
+- **In-Memory Vector Store** (For fast context retrieval with built-in daily quota-exhaustion fallback mechanisms)
+- **Custom Markdown Engine** (Regex-based formatting repair for dynamic UI rendering)
 
 ---
 
