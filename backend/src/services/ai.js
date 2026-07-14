@@ -47,7 +47,7 @@ class AIService {
         contents: `${systemPrompt}\n\n${userPrompt}`,
         config: {
           temperature: 0,
-          maxOutputTokens: 1024,
+          maxOutputTokens: 800,
         }
       });
       return response.text;
@@ -69,7 +69,7 @@ class AIService {
         ],
         config: {
           temperature: 0,
-          maxOutputTokens: 1024,
+          maxOutputTokens: 800,
         }
       });
       return response.text;
@@ -115,7 +115,7 @@ class AIService {
     try {
       // Map file tree to just names to save massive amounts of tokens
       const fileNames = Array.isArray(repoContext.fileTree) 
-        ? repoContext.fileTree.map(f => f.path || f).slice(0, 30).join(', ') 
+        ? repoContext.fileTree.map(f => f.path || f).slice(0, 15).join(', ') 
         : 'Not available';
 
       return await this._generate(
