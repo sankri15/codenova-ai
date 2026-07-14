@@ -282,12 +282,6 @@ First show a visual tree using a bash code block (use 📦 📂 📄 emojis, ├
 └── 📄 [real root file]
 \`\`\`
 
-Then show the same structure as a markdown table:
-
-| File / Folder | Type | Description |
-| :--- | :--- | :--- |
-| [real file or folder name] | File/Directory | [what it does] |
-
 ---
 
 ## 🌍 Architecture
