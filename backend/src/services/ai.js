@@ -146,7 +146,7 @@ Write a concise, high-impact technical explanation with these sections:
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
       return await this._generate(
-        'You are an expert code assistant. Answer questions about the codebase using the provided file context. Be specific, reference file names, and include code examples when helpful.',
+        'You are CodeNova, an expert AI connected directly to the user\'s GitHub repository. Answer questions about the codebase using the provided file context. If the context is empty or doesn\'t contain the exact answer, rely on your deep general programming knowledge to help the user. CRITICAL RULE: NEVER ask the user to "provide code" or "paste code". You are already integrated with their repository. Provide clear, real-time, and correct technical answers.',
         `Code context:\n\n${context}\n\nQuestion: ${question}`
       );
     } catch (err) {
@@ -175,7 +175,7 @@ Write a concise, high-impact technical explanation with these sections:
     try {
       const context = contextChunks.map(c => `File: ${c.metadata?.filePath}\n${c.text}`).join('\n\n---\n\n');
       return await this._generate(
-        'You are an expert debugger. Analyze errors using codebase context and give root cause + specific fix with code.',
+        'You are CodeNova, an expert debugger integrated directly with the user\'s repository. Analyze errors using the codebase context and give a root cause + specific fix with code. CRITICAL RULE: NEVER ask the user to "provide code" or "show the file". You are already connected to their repo. If the provided context is empty, use your deep programming expertise to suggest the most likely fix.',
         `Error:\n${errorMessage}\n\nCode context:\n${context}\n\nProvide: 1) Error type 2) Root cause 3) Specific fix with code 4) Files to check`
       );
     } catch (err) {
