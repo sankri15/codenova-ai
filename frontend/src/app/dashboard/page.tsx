@@ -6,6 +6,7 @@ import { Sparkles, GitBranch, Loader2, Zap, Star, GitFork, Eye, Code2, Users, Cl
 import toast from 'react-hot-toast';
 import dynamic from 'next/dynamic';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useSearchParams } from 'next/navigation';
@@ -438,6 +439,22 @@ function ExplainPanel({ sessionId, repoContext }: { sessionId: string; repoConte
                     blockquote: ({ children }) => (
                       <blockquote style={{ borderLeft: '4px solid #FF6B35', background: 'linear-gradient(90deg, rgba(255,107,53,0.08), transparent)', padding: '0.8rem 1.5rem', borderRadius: '0 12px 12px 0', marginBottom: '1.8rem', color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>{children}</blockquote>
                     ),
+                    table: ({ children }) => (
+                      <div style={{ overflowX: 'auto', marginBottom: '2.5rem', marginTop: '0.75rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>{children}</table>
+                      </div>
+                    ),
+                    thead: ({ children }) => (
+                      <thead style={{ background: 'rgba(255,107,53,0.06)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>{children}</thead>
+                    ),
+                    tbody: ({ children }) => <tbody>{children}</tbody>,
+                    tr: ({ children }) => <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{children}</tr>,
+                    th: ({ children }) => (
+                      <th style={{ padding: '12px 18px', textAlign: 'left', color: '#FF6B35', fontWeight: 700, fontSize: '12.5px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{children}</th>
+                    ),
+                    td: ({ children }) => (
+                      <td style={{ padding: '11px 18px', color: 'rgba(255,255,255,0.78)', borderRight: '1px solid rgba(255,255,255,0.04)', verticalAlign: 'top', lineHeight: '1.7' }}>{children}</td>
+                    ),
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     code: ({ inline, className, children, ...props }: any) => {
                       const match = /language-(\w+)/.exec(className || '');
@@ -451,6 +468,7 @@ function ExplainPanel({ sessionId, repoContext }: { sessionId: string; repoConte
                       );
                     },
                   }}
+                  remarkPlugins={[remarkGfm]}
                 >
                   {explanation || 'No explanation available.'}
                 </ReactMarkdown>
